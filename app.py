@@ -107,6 +107,15 @@ def add_habit():
     return redirect("/")
 
 
+@app.post("/habits/<int:habit_id>/delete")
+def delete_habit(habit_id):
+    habit = db.session.get(Habit, habit_id)
+    if habit and habit.user_id == current_user().id:
+        db.session.delete(habit)  # cascade takes the logs with it
+        db.session.commit()
+    return redirect("/")
+
+
 @app.post("/toggle")
 def toggle():
     data = request.get_json(silent=True) or {}

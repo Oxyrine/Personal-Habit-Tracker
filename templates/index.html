@@ -7,21 +7,20 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<main>
-  <h1>Habit Tracker</h1>
+<div class="layout">
 
-  <section class="card">
-    <h2>Today &mdash; {{ today }}</h2>
-    <ul class="checklist">
+  <nav class="sidebar" aria-label="Habits">
+    <h1>Habits</h1>
+    <ul class="nav">
+      <li><a href="#overview">Overview</a></li>
       {% for h in habits %}
       <li>
-        <label>
-          <input type="checkbox" class="check" data-id="{{ h.id }}" {% if h.done %}checked{% endif %}>
-          <span class="name">{{ h.name }}</span>
-        </label>
+        <a href="#habit-{{ h.id }}" aria-label="{{ h.name }}">
+          <span class="nav-name">{{ h.name }}</span>
+          {# streak is decorative here; the habit's own section states it in full #}
+          <span class="badge" aria-hidden="true">&#128293;&nbsp;<b data-cur="{{ h.id }}">{{ h.current }}</b></span>
+        </a>
       </li>
-      {% else %}
-      <li class="empty">No habits yet. Add one below.</li>
       {% endfor %}
     </ul>
 
@@ -29,26 +28,73 @@
       <input name="name" maxlength="60" placeholder="New habit&hellip;" required autocomplete="off">
       <button type="submit">Add</button>
     </form>
-  </section>
+  </nav>
 
-  {% if habits %}
-  <section class="card">
-    <header class="section-head">
-      <h2>All habits</h2>
-      <span class="sub">shade = habits completed that day</span>
-    </header>
-    <div id="overall" class="heatmap-scroll"></div>
-    <div class="legend">
-      0
-      <span class="day l0"></span><span class="day l1"></span><span class="day l2"></span>
-      <span class="day l3"></span><span class="day l4"></span>
-      4+
-    </div>
-  </section>
+  <main>
+    <section data-view="overview">
+      <div class="card">
+        <header class="section-head"><h2>Today &mdash; {{ today }}</h2></header>
+        <ul class="checklist">
+          {% for h in habits %}
+          <li>
+            <label>
+              <input type="checkbox" class="check" data-id="{{ h.id }}" {% if h.done %}checked{% endif %}>
+              <span class="name">{{ h.name }}</span>
+            </label>
+          </li>
+          {% else %}
+          <li class="empty">No habits yet. Add one in the sidebar.</li>
+          {% endfor %}
+        </ul>
+      </div>
 
-  <div id="habit-sections"></div>
-  {% endif %}
-</main>
+      {% if habits %}
+      <div class="card">
+        <header class="section-head">
+          <h2>All habits</h2>
+          <span class="sub">shade = habits completed that day</span>
+        </header>
+        <div class="heatmap-scroll" data-heatmap="overall"></div>
+        <div class="legend">
+          0
+          <span class="day l0"></span><span class="day l1"></span><span class="day l2"></span>
+          <span class="day l3"></span><span class="day l4"></span>
+          4+
+        </div>
+      </div>
+      {% endif %}
+    </section>
+
+    {% for h in habits %}
+    <section data-view="habit-{{ h.id }}" hidden>
+      <div class="card">
+        <header class="section-head">
+          <h2>{{ h.name }}</h2>
+          <form method="post" action="/habits/{{ h.id }}/delete"
+                onsubmit="return confirm('Delete “{{ h.name }}” and its entire history?')">
+            <button type="submit" class="danger">Delete</button>
+          </form>
+        </header>
+
+        <label class="today-toggle">
+          <input type="checkbox" class="check" data-id="{{ h.id }}" {% if h.done %}checked{% endif %}>
+          <span class="name">Done today</span>
+        </label>
+
+        <div class="stats">
+          <div class="stat"><b data-cur="{{ h.id }}">{{ h.current }}</b><span>Current streak</span></div>
+          <div class="stat"><b data-long="{{ h.id }}">{{ h.longest }}</b><span>Longest streak</span></div>
+          <div class="stat"><b data-total="{{ h.id }}">{{ h.total }}</b><span>Days done</span></div>
+        </div>
+
+        <div class="heatmap-scroll" data-heatmap="{{ h.id }}"></div>
+        <p class="sub">Tracked since {{ h.created_on }} &mdash; blank squares are days before this habit existed.</p>
+      </div>
+    </section>
+    {% endfor %}
+  </main>
+
+</div>
 
 <script id="data" type="application/json">
   {{ {"habits": habits, "today": today} | tojson }}

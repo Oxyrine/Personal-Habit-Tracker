@@ -18,6 +18,13 @@ function el(tag, cls, text) {
   return node;
 }
 
+/** A habit's numbers appear in both the sidebar and its section. */
+function setField(name, id, value) {
+  for (const node of document.querySelectorAll(`[data-${name}="${id}"]`)) {
+    node.textContent = value;
+  }
+}
+
 /** Draws the grid once into `mount`; returns a repaint fn that re-runs `cellFn`. */
 function heatmap(mount, cellFn) {
   const wrap = el("div", "heatmap-wrap");
@@ -54,7 +61,7 @@ function heatmap(mount, cellFn) {
 const repaints = [];
 
 // --- combined graph: shade = how many habits were completed that day --------
-const overall = document.getElementById("overall"); // absent until a habit exists
+const overall = document.querySelector('[data-heatmap="overall"]'); // absent until a habit exists
 if (overall) {
   repaints.push(
     heatmap(overall, (cell, key) => {
@@ -66,40 +73,9 @@ if (overall) {
   );
 }
 
-// --- one section per habit --------------------------------------------------
-const sections = document.getElementById("habit-sections");
-
+// --- one grid per habit -----------------------------------------------------
 for (const h of habits) {
-  const card = el("section", "card");
-  const head = el("header", "section-head");
-  head.append(el("h2", null, h.name));
-  const sub = el("span", "sub");
-  sub.id = `total-${h.id}`;
-  head.append(sub);
-  card.append(head);
-
-  h.setTotal = (n) => {
-    sub.textContent = `tracked since ${h.created_on} · ${n} day${n === 1 ? "" : "s"} done`;
-  };
-  h.setTotal(h.total);
-
-  const stats = el("div", "stats");
-  for (const [label, value, id] of [
-    ["Current streak", h.current, `cur-${h.id}`],
-    ["Longest streak", h.longest, `long-${h.id}`],
-  ]) {
-    const box = el("div", "stat");
-    const num = el("b", null, value);
-    num.id = id;
-    box.append(num, el("span", null, label));
-    stats.append(box);
-  }
-  card.append(stats);
-
-  const mount = el("div", "heatmap-scroll");
-  card.append(mount);
-  sections.append(card);
-
+  const mount = document.querySelector(`[data-heatmap="${h.id}"]`);
   repaints.push(
     heatmap(mount, (cell, key) => {
       if (key < h.created_on) {
@@ -117,6 +93,31 @@ for (const h of habits) {
 const paintAll = () => repaints.forEach((fn) => fn());
 paintAll();
 
+// --- sidebar: one view at a time, driven by the URL hash --------------------
+// Plain <a href="#..."> links, so back/forward and deep links work for free.
+const views = document.querySelectorAll("[data-view]");
+const links = document.querySelectorAll(".nav a");
+
+function showView() {
+  const id = location.hash.slice(1) || "overview";
+  let matched = false;
+  for (const view of views) {
+    const on = view.dataset.view === id;
+    view.hidden = !on;
+    matched = matched || on;
+  }
+  if (!matched) {
+    location.replace("#overview"); // hash pointing at a deleted habit
+    return;
+  }
+  for (const link of links) {
+    link.classList.toggle("active", link.getAttribute("href") === "#" + id);
+  }
+}
+
+addEventListener("hashchange", showView);
+showView();
+
 // --- toggling ---------------------------------------------------------------
 for (const box of document.querySelectorAll(".check")) {
   box.addEventListener("change", async () => {
@@ -132,9 +133,13 @@ for (const box of document.querySelectorAll(".check")) {
 
       const habit = habits.find((h) => h.id === data.habit_id);
       data.done ? habit.set.add(data.day) : habit.set.delete(data.day);
-      document.getElementById("cur-" + data.habit_id).textContent = data.current;
-      document.getElementById("long-" + data.habit_id).textContent = data.longest;
-      habit.setTotal(data.total);
+      setField("cur", data.habit_id, data.current);
+      setField("long", data.habit_id, data.longest);
+      setField("total", data.habit_id, data.total);
+      // the same habit has a checkbox in the overview and in its own section
+      for (const twin of document.querySelectorAll(`.check[data-id="${data.habit_id}"]`)) {
+        twin.checked = data.done;
+      }
       paintAll();
     } catch {
       box.checked = !box.checked; // server said no, put the UI back
