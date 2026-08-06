@@ -76,15 +76,11 @@ def dashboard():
     start = today - timedelta(days=WINDOW - 1)
     habits = Habit.query.filter_by(user_id=current_user().id).order_by(Habit.id).all()
 
-    # ponytail: counted in Python, one query. Move to a SQL GROUP BY if this ever
-    # holds more than a few years of logs.
-    counts = {}
+    # Per-habit day lists only; the page derives the combined graph from them, so
+    # there's one source of truth for "was this done".
     rows = []
     for h in habits:
         days = {log.day for log in h.logs}
-        for d in days:
-            if d >= start:
-                counts[d.isoformat()] = counts.get(d.isoformat(), 0) + 1
         current, longest = compute_streaks(days, h.created_on, today)
         rows.append(
             {
@@ -94,12 +90,12 @@ def dashboard():
                 "done": today in days,
                 "current": current,
                 "longest": longest,
+                "total": sum(1 for d in days if d >= h.created_on),
+                "days": sorted(d.isoformat() for d in days if d >= start),
             }
         )
 
-    return render_template(
-        "index.html", habits=rows, counts=counts, today=today.isoformat()
-    )
+    return render_template("index.html", habits=rows, today=today.isoformat())
 
 
 @app.post("/habits")
@@ -140,7 +136,7 @@ def toggle():
         done=day in days,
         current=current,
         longest=longest,
-        count=Log.query.filter_by(day=day).count(),
+        total=sum(1 for d in days if d >= habit.created_on),
     )
 
 

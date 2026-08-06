@@ -11,22 +11,6 @@
   <h1>Habit Tracker</h1>
 
   <section class="card">
-    <h2>Last 365 days</h2>
-    <div class="heatmap-scroll">
-      <div class="heatmap-wrap">
-        <div id="months" class="months"></div>
-        <div id="heatmap" class="heatmap"></div>
-      </div>
-    </div>
-    <div class="legend">
-      Less
-      <span class="day l0"></span><span class="day l1"></span><span class="day l2"></span>
-      <span class="day l3"></span><span class="day l4"></span>
-      More
-    </div>
-  </section>
-
-  <section class="card">
     <h2>Today &mdash; {{ today }}</h2>
     <ul class="checklist">
       {% for h in habits %}
@@ -35,11 +19,6 @@
           <input type="checkbox" class="check" data-id="{{ h.id }}" {% if h.done %}checked{% endif %}>
           <span class="name">{{ h.name }}</span>
         </label>
-        <span class="streaks">
-          <span title="Current streak">&#128293; <b id="cur-{{ h.id }}">{{ h.current }}</b></span>
-          <span title="Longest streak">&#127942; <b id="long-{{ h.id }}">{{ h.longest }}</b></span>
-          <span class="since">since {{ h.created_on }}</span>
-        </span>
       </li>
       {% else %}
       <li class="empty">No habits yet. Add one below.</li>
@@ -51,10 +30,28 @@
       <button type="submit">Add</button>
     </form>
   </section>
+
+  {% if habits %}
+  <section class="card">
+    <header class="section-head">
+      <h2>All habits</h2>
+      <span class="sub">shade = habits completed that day</span>
+    </header>
+    <div id="overall" class="heatmap-scroll"></div>
+    <div class="legend">
+      0
+      <span class="day l0"></span><span class="day l1"></span><span class="day l2"></span>
+      <span class="day l3"></span><span class="day l4"></span>
+      4+
+    </div>
+  </section>
+
+  <div id="habit-sections"></div>
+  {% endif %}
 </main>
 
 <script id="data" type="application/json">
-  {{ {"counts": counts, "today": today} | tojson }}
+  {{ {"habits": habits, "today": today} | tojson }}
 </script>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
