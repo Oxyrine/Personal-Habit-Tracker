@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Habit Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main>
+  <h1>Habit Tracker</h1>
+
+  <section class="card">
+    <h2>Last 365 days</h2>
+    <div class="heatmap-scroll">
+      <div class="heatmap-wrap">
+        <div id="months" class="months"></div>
+        <div id="heatmap" class="heatmap"></div>
+      </div>
+    </div>
+    <div class="legend">
+      Less
+      <span class="day l0"></span><span class="day l1"></span><span class="day l2"></span>
+      <span class="day l3"></span><span class="day l4"></span>
+      More
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Today &mdash; {{ today }}</h2>
+    <ul class="checklist">
+      {% for h in habits %}
+      <li>
+        <label>
+          <input type="checkbox" class="check" data-id="{{ h.id }}" {% if h.done %}checked{% endif %}>
+          <span class="name">{{ h.name }}</span>
+        </label>
+        <span class="streaks">
+          <span title="Current streak">&#128293; <b id="cur-{{ h.id }}">{{ h.current }}</b></span>
+          <span title="Longest streak">&#127942; <b id="long-{{ h.id }}">{{ h.longest }}</b></span>
+          <span class="since">since {{ h.created_on }}</span>
+        </span>
+      </li>
+      {% else %}
+      <li class="empty">No habits yet. Add one below.</li>
+      {% endfor %}
+    </ul>
+
+    <form method="post" action="/habits" class="add">
+      <input name="name" maxlength="60" placeholder="New habit&hellip;" required autocomplete="off">
+      <button type="submit">Add</button>
+    </form>
+  </section>
+</main>
+
+<script id="data" type="application/json">
+  {{ {"counts": counts, "today": today} | tojson }}
+</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
