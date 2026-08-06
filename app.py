@@ -5,10 +5,18 @@ from flask import Flask, abort, jsonify, redirect, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-# Absolute, so the DB lands next to app.py no matter where you launch from.
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
-    app.root_path, "habits.db"
-)
+
+# Vercel's filesystem is ephemeral, so production points DATABASE_URL at Neon
+# (set by the Vercel Postgres integration) instead of a local SQLite file.
+# Local dev needs neither an env var nor a network connection: it falls back
+# to a SQLite file next to app.py.
+db_url = os.environ.get("DATABASE_URL")
+if db_url:
+    db_url = db_url.replace("postgres://", "postgresql://", 1)  # SQLAlchemy 2.x requirement
+else:
+    db_url = "sqlite:///" + os.path.join(app.root_path, "habits.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+
 db = SQLAlchemy(app)
 
 DEFAULT_USER = "me"
@@ -37,6 +45,13 @@ class Log(db.Model):
     habit_id = db.Column(db.Integer, db.ForeignKey("habit.id"), nullable=False)
     day = db.Column(db.Date, nullable=False, index=True)
     __table_args__ = (db.UniqueConstraint("habit_id", "day"),)
+
+
+# create_all() is idempotent (checks what exists before creating), so running
+# it at import time is safe on every cold start and keeps local `python app.py`
+# working with zero setup.
+with app.app_context():
+    db.create_all()
 
 
 def compute_streaks(days, created_on, today):
@@ -150,6 +165,4 @@ def toggle():
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True, port=int(os.environ.get("PORT", 5000)))

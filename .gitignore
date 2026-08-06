@@ -2,3 +2,6 @@ habits.db
 instance/
 __pycache__/
 .venv/
+.vercel/
+.env
+.env.local
