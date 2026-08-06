@@ -4,13 +4,18 @@
   --line: #30363d;
   --text: #e6edf3;
   --dim: #8b949e;
+  --dim-placeholder: #a8b3bf; /* brighter than --dim: 15px placeholder text needs 4.5:1, --dim only clears it at larger sizes */
   --cell: 12px;
   --gap: 3px;
-  --l0: #161b22;
-  --l1: #0e4429;
-  --l2: #006d32;
-  --l3: #26a641;
-  --l4: #39d353;
+  /* teal completion ramp — deliberately not GitHub's green, and spread wider so
+     adjacent levels are distinguishable rather than near-identical hue steps */
+  --l0: #28394a;
+  --l1: #125451;
+  --l1-hover: #126861;
+  --l2: #128c80;
+  --l3: #1bcab5;
+  --l4: #5cf2e2;
+  --danger: #f85149;
 }
 
 * { box-sizing: border-box; }
@@ -92,6 +97,12 @@ p.sub { margin: 0.75rem 0 0; }
 
 /* --- heatmap ------------------------------------------------------------ */
 .heatmap-scroll { overflow-x: auto; padding-bottom: 4px; }
+.heatmap-scroll:focus-visible { outline: 2px solid var(--l3); outline-offset: 2px; }
+/* app.js adds this only when the grid is actually scrolled past its start —
+   never fade cells that aren't clipped */
+.heatmap-scroll.has-hidden-start {
+  mask-image: linear-gradient(to right, transparent, black 24px);
+}
 .heatmap-wrap { display: inline-block; min-width: min-content; }
 
 .heatmap,
@@ -120,8 +131,14 @@ p.sub { margin: 0.75rem 0 0; }
   outline: 1px solid rgba(255, 255, 255, 0.04);
   outline-offset: -1px;
 }
-.day.pad,
-.day.none { background: transparent; outline: none; } /* padding / pre-creation */
+.day.pad { background: transparent; outline: none; } /* leading blanks, not real days */
+.day.none {
+  /* before the habit existed: outside the window, not a miss — must read
+     differently from l0 (tracked, not done), not just a 4%-alpha hairline */
+  background: transparent;
+  outline: 1px dashed rgba(255, 255, 255, 0.12);
+  outline-offset: -1px;
+}
 .l1 { background: var(--l1); }
 .l2 { background: var(--l2); }
 .l3 { background: var(--l3); }
@@ -147,9 +164,19 @@ p.sub { margin: 0.75rem 0 0; }
 }
 .checklist li:last-child { border-bottom: none; }
 .checklist label { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
-.check { width: 16px; height: 16px; accent-color: var(--l4); cursor: pointer; }
+.check { width: 16px; height: 16px; accent-color: var(--l3); cursor: pointer; }
 .check:checked + .name { color: var(--dim); text-decoration: line-through; }
+.check:disabled { opacity: 0.5; cursor: progress; }
 .empty { color: var(--dim); }
+
+/* --- save status: aria-live host, doubles as the visible error surface -- */
+.status {
+  min-height: 1.2em;
+  margin: -0.3rem 0 0.8rem;
+  font-size: 13px;
+  color: var(--dim);
+}
+.status.error { color: var(--danger); }
 
 .today-toggle {
   display: inline-flex;
@@ -169,8 +196,8 @@ p.sub { margin: 0.75rem 0 0; }
   font-size: 13px;
   cursor: pointer;
 }
-.danger:hover { border-color: #f85149; color: #f85149; }
-.danger:focus-visible { outline: 2px solid #f85149; outline-offset: 2px; }
+.danger:hover { border-color: var(--danger); color: var(--danger); }
+.danger:focus-visible { outline: 2px solid var(--danger); outline-offset: 2px; }
 
 .add { display: flex; gap: 0.5rem; }
 .add input {
@@ -183,16 +210,18 @@ p.sub { margin: 0.75rem 0 0; }
   color: inherit;
   font: inherit;
 }
+.add input::placeholder { color: var(--dim-placeholder); }
 .add input:focus-visible,
 .nav a:focus-visible,
+.add button:focus-visible,
 .check:focus-visible { outline: 2px solid var(--l3); outline-offset: 2px; }
 .add button {
   padding: 0.5rem 1rem;
-  background: var(--l2);
-  border: 1px solid var(--l3);
+  background: var(--l1);
+  border: 1px solid var(--l2);
   border-radius: 6px;
   color: #fff;
   font: inherit;
   cursor: pointer;
 }
-.add button:hover { background: var(--l3); }
+.add button:hover { background: var(--l1-hover); }

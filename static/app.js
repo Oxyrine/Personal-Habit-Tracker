@@ -25,8 +25,13 @@ function setField(name, id, value) {
   }
 }
 
-/** Draws the grid once into `mount`; returns a repaint fn that re-runs `cellFn`. */
-function heatmap(mount, cellFn) {
+/**
+ * Draws the grid once into `mount`; returns a repaint fn that re-runs `cellFn`.
+ * `mount` (the `.heatmap-scroll` container) becomes the accessible surface —
+ * focusable, labeled with `label` — while the visual grid itself is hidden
+ * from assistive tech so a screen reader isn't handed 365 anonymous nodes.
+ */
+function heatmap(mount, cellFn, labelFn) {
   const wrap = el("div", "heatmap-wrap");
   const months = el("div", "months");
   const grid = el("div", "heatmap");
@@ -43,19 +48,29 @@ function heatmap(mount, cellFn) {
     const day = new Date(START + Math.max(0, col * 7 - OFFSET) * DAY);
     if (day.getUTCMonth() === lastMonth) continue;
     lastMonth = day.getUTCMonth();
-    const label = el("span", null, day.toLocaleString("en", { month: "short", timeZone: "UTC" }));
-    label.style.gridColumn = col + 1;
-    months.append(label);
+    const monthLabel = el("span", null, day.toLocaleString("en", { month: "short", timeZone: "UTC" }));
+    monthLabel.style.gridColumn = col + 1;
+    months.append(monthLabel);
   }
 
   wrap.append(months, grid);
+  wrap.setAttribute("aria-hidden", "true"); // decorative once `mount` carries the label below
   mount.append(wrap);
+  mount.tabIndex = 0;
+  mount.setAttribute("role", "group");
 
   return () => {
     for (const cell of grid.children) {
       if (!cell.classList.contains("pad")) cellFn(cell, cell.dataset.day);
     }
+    mount.setAttribute("aria-label", labelFn()); // streak numbers can change, so re-derive every repaint
   };
+}
+
+/** Scrolls a `.heatmap-scroll` to today and flags whether history is clipped on the left. */
+function positionScroller(mount) {
+  mount.scrollLeft = mount.scrollWidth;
+  mount.classList.toggle("has-hidden-start", mount.scrollWidth > mount.clientWidth);
 }
 
 const repaints = [];
@@ -63,19 +78,27 @@ const repaints = [];
 // --- combined graph: shade = how many habits were completed that day --------
 const overall = document.querySelector('[data-heatmap="overall"]'); // absent until a habit exists
 if (overall) {
+  const label = () => {
+    const activeDays = KEYS.filter((key) => habits.some((h) => h.set.has(key))).length;
+    return `All habits combined: ${activeDays} of ${KEYS.length} days had at least one habit completed, over the last year.`;
+  };
   repaints.push(
     heatmap(overall, (cell, key) => {
       let done = 0;
       for (const h of habits) if (h.set.has(key)) done++;
       cell.className = "day l" + Math.min(4, done);
       cell.title = `${done} habit${done === 1 ? "" : "s"} on ${key}`;
-    })
+    }, label)
   );
 }
 
 // --- one grid per habit -----------------------------------------------------
 for (const h of habits) {
   const mount = document.querySelector(`[data-heatmap="${h.id}"]`);
+  const trackedDays = KEYS.filter((key) => key >= h.created_on).length;
+  const label = () =>
+    `${h.name}: ${h.total} of ${trackedDays} days completed since ${h.created_on}. ` +
+    `Current streak ${h.current} day${h.current === 1 ? "" : "s"}, longest streak ${h.longest} day${h.longest === 1 ? "" : "s"}.`;
   repaints.push(
     heatmap(mount, (cell, key) => {
       if (key < h.created_on) {
@@ -85,13 +108,21 @@ for (const h of habits) {
       }
       const done = h.set.has(key);
       cell.className = "day " + (done ? "l4" : "l0");
-      cell.title = `${done ? "✓ done" : "✗ missed"} on ${key}`;
-    })
+      cell.title = done ? `✓ done on ${key}` : key === today ? "today — not yet" : `✗ missed on ${key}`;
+    }, label)
   );
 }
 
 const paintAll = () => repaints.forEach((fn) => fn());
 paintAll();
+
+/** Only measurable once a `[data-view]` section is actually visible. */
+function positionVisibleScrollers() {
+  for (const view of views) {
+    if (view.hidden) continue;
+    for (const scroller of view.querySelectorAll(".heatmap-scroll")) positionScroller(scroller);
+  }
+}
 
 // --- sidebar: one view at a time, driven by the URL hash --------------------
 // Plain <a href="#..."> links, so back/forward and deep links work for free.
@@ -113,12 +144,15 @@ function showView() {
   for (const link of links) {
     link.classList.toggle("active", link.getAttribute("href") === "#" + id);
   }
+  positionVisibleScrollers(); // hidden sections can't be measured until shown
 }
 
 addEventListener("hashchange", showView);
 showView();
 
 // --- toggling ---------------------------------------------------------------
+const status = document.getElementById("status");
+
 for (const box of document.querySelectorAll(".check")) {
   box.addEventListener("change", async () => {
     box.disabled = true;
@@ -133,16 +167,27 @@ for (const box of document.querySelectorAll(".check")) {
 
       const habit = habits.find((h) => h.id === data.habit_id);
       data.done ? habit.set.add(data.day) : habit.set.delete(data.day);
+      // heatmap aria-labels read these live, so keep the cached habit in sync too
+      habit.current = data.current;
+      habit.longest = data.longest;
+      habit.total = data.total;
       setField("cur", data.habit_id, data.current);
       setField("long", data.habit_id, data.longest);
       setField("total", data.habit_id, data.total);
       // the same habit has a checkbox in the overview and in its own section
       for (const twin of document.querySelectorAll(`.check[data-id="${data.habit_id}"]`)) {
         twin.checked = data.done;
+        twin.removeAttribute("aria-invalid");
       }
       paintAll();
+
+      status.classList.remove("error");
+      status.textContent = `${habit.name} marked ${data.done ? "done" : "not done"}. Current streak ${data.current} day${data.current === 1 ? "" : "s"}.`;
     } catch {
       box.checked = !box.checked; // server said no, put the UI back
+      box.setAttribute("aria-invalid", "true");
+      status.classList.add("error");
+      status.textContent = "Couldn't save — check your connection and try again.";
     } finally {
       box.disabled = false;
     }
