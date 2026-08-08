@@ -14,15 +14,19 @@ streak tracking, and daily check-off — Flask + SQLAlchemy, no frontend framewo
   `app.py` picks whichever is set — no code change needed to switch.
 - **Frontend**: server-rendered Jinja (`templates/`) + vanilla CSS/JS (`static/`), no
   build step, no npm at the app level
-- **Auth**: Google OAuth only (Authlib), no password system. First sign-in creates a
-  `User` row (`google_sub`, `email`, `name`); every route requires a session.
+- **Auth**: plain email/password. `werkzeug.security` (already a Flask dependency, no
+  new package) hashes passwords. `/signup` and `/login` are separate routes; every
+  other route requires a session (`login_required`). Previously Google OAuth via
+  Authlib — dropped because Google Cloud Console setup (consent screen, credentials,
+  redirect URIs) was too much ceremony for a personal app; it also crashed production
+  once (Authlib pulled in `requests`, which wasn't in `requirements.txt`).
 - **Deploy**: Vercel's Python runtime auto-detects Flask from `requirements.txt` +
   `api/index.py` (a thin re-export of `app.py`'s `app`). `vercel.json` is intentionally
   empty — an explicit rewrite once broke routing; Vercel's own detection handles it.
 
 ## Data model (`app.py`)
 
-- `User(id, google_sub, email, name)`
+- `User(id, email unique, password_hash, name)`
 - `Habit(id, user_id, name, created_on)`
 - `Log(id, habit_id, day)` — a row's *existence* means done that day, no boolean
 - Streaks (`compute_streaks`) count only from `created_on` forward, not from the graph's
@@ -38,14 +42,12 @@ Full palette/tokens in `static/style.css` `:root`.
 
 ## Known gaps / next steps
 
-- **Google OAuth credentials aren't set on Vercel yet** — `/login` shows a graceful
-  "not configured" notice instead of the real button until `GOOGLE_CLIENT_ID` /
-  `GOOGLE_CLIENT_SECRET` / `SECRET_KEY` are set (`vercel env add ...`, values are
-  secrets — run that yourself, not through chat). See commit history for the exact
-  Google Cloud Console redirect URIs needed.
+- No CSRF protection on forms (consistent with the app's existing risk posture — a
+  personal single-target app; revisit if that ever changes)
 - `signup-ui/` (see below) is a standalone design, **not wired to the Flask login flow
-  yet** — the live `/login` still uses `templates/login.html`.
-- No habit rename/edit, no CSV export, no reminders.
+  yet** — the live `/login` and `/signup` use `templates/login.html` / `signup.html`,
+  plain email/password, not the React prototype
+- No habit rename/edit, no CSV export, no reminders, no password reset flow
 
 ## Subproject: `signup-ui/`
 
