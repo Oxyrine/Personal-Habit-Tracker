@@ -52,11 +52,17 @@ Full palette/tokens in `static/style.css` `:root`.
 ## Subproject: `signup-ui/`
 
 Standalone React/Vite/Tailwind v4 build of a "Sign Up" page, built to a specific visual
-spec — separate npm project, own `package.json`, not part of the Flask app's deploy.
-`motion/react` for animation, `lucide-react` for icons (note: this lucide-react version
-ships **no brand icons** — Google/Github buttons use `Globe`/`GitFork` as stand-ins).
-Hero panel background is a CSS gradient placeholder (video generation was requested but
-blocked by workspace credits — revisit if a real video is wanted).
+spec — separate npm project, own `package.json`, own Vercel project, not part of the
+Flask app's deploy. `motion/react` for animation, `lucide-react` for icons (note: this
+lucide-react version ships **no brand icons** — the Github button uses `GitFork` as a
+stand-in; the Google option was dropped entirely, not just relabeled). Hero panel
+background is a CSS gradient placeholder (video generation was requested but blocked by
+workspace credits — revisit if a real video is wanted).
+
+- **Live**: https://signup-ui-rose.vercel.app (Vercel project `oxyrines-projects/signup-ui`,
+  connected to `Oxyrine/Personal-Habit-Tracker` `main` with root directory `signup-ui`
+  — auto-deploys on push like the main app, but only when files under `signup-ui/`
+  change; the two Vercel projects share one GitHub repo, scoped by root directory)
 
 ```bash
 cd signup-ui && npm run dev   # localhost:5173
