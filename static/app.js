@@ -150,6 +150,27 @@ function showView() {
 addEventListener("hashchange", showView);
 showView();
 
+// --- scroll-entry reveal ------------------------------------------------
+// CSS only hides .reveal elements once .js is set (see index.html's inline
+// script), so this is pure enhancement: no JS means everything stays visible.
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.classList.add("is-visible");
+      revealObserver.unobserve(entry.target);
+    }
+  },
+  { threshold: 0.1 }
+);
+for (const card of document.querySelectorAll(".reveal")) revealObserver.observe(card);
+
+// Backgrounded/prerendered tabs can suspend IntersectionObserver indefinitely —
+// never let content stay invisible waiting on a callback that may not come.
+setTimeout(() => {
+  for (const card of document.querySelectorAll(".reveal:not(.is-visible)")) card.classList.add("is-visible");
+}, 800);
+
 // --- toggling ---------------------------------------------------------------
 const status = document.getElementById("status");
 
