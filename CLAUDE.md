@@ -60,9 +60,12 @@ background is a CSS gradient placeholder (video generation was requested but blo
 workspace credits — revisit if a real video is wanted).
 
 - **Live**: https://signup-ui-rose.vercel.app (Vercel project `oxyrines-projects/signup-ui`,
-  connected to `Oxyrine/Personal-Habit-Tracker` `main` with root directory `signup-ui`
-  — auto-deploys on push like the main app, but only when files under `signup-ui/`
-  change; the two Vercel projects share one GitHub repo, scoped by root directory)
+  connected to `Oxyrine/Personal-Habit-Tracker` `main`, root directory `signup-ui`).
+  Auto-deploys on every push to `main` — root directory alone does NOT skip builds for
+  unrelated changes elsewhere in the repo (verified: a root-only `CLAUDE.md` commit
+  still triggered a full rebuild). Actually skipped via an Ignored Build Step:
+  `git diff --quiet HEAD^ HEAD -- .` (exit 0 = skip, set in project settings, evaluated
+  from the `signup-ui/` cwd since that's the root directory).
 
 ```bash
 cd signup-ui && npm run dev   # localhost:5173
