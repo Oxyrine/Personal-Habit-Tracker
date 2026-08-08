@@ -36,7 +36,7 @@ function HeroColumn() {
           className="flex items-center gap-2"
         >
           <Circle className="fill-white text-white" size={20} />
-          <span className="text-xl font-semibold tracking-tight">Aurora</span>
+          <span className="text-xl font-semibold tracking-tight">Habit Tracker</span>
         </motion.div>
 
         <motion.div
@@ -46,10 +46,10 @@ function HeroColumn() {
           }}
         >
           <h1 className="text-4xl font-medium tracking-tight whitespace-nowrap">
-            Join Aurora
+            Join Habit Tracker
           </h1>
           <p className="text-white/60 text-sm leading-relaxed px-4 mt-2">
-            Follow these 3 quick phases to activate your space.
+            Follow these 2 quick phases to activate your space.
           </p>
         </motion.div>
 
@@ -61,8 +61,7 @@ function HeroColumn() {
           className="space-y-3"
         >
           <StepItem number={1} text="Register your identity" active />
-          <StepItem number={2} text="Configure your studio" />
-          <StepItem number={3} text="Finalize your profile" />
+          <StepItem number={2} text="Finalize your profile" />
         </motion.div>
       </motion.div>
     </div>
