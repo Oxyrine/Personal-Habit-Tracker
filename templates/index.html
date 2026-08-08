@@ -35,6 +35,13 @@
       <input name="name" maxlength="60" placeholder="New habit&hellip;" required autocomplete="off">
       <button type="submit">Add</button>
     </form>
+
+    <div class="account">
+      <span class="account-name">{{ user.name }}</span>
+      <form method="post" action="/logout">
+        <button type="submit" class="logout-btn">Sign out</button>
+      </form>
+    </div>
   </nav>
 
   <main>

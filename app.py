@@ -1,10 +1,25 @@
 import os
 from datetime import date, timedelta
+from functools import wraps
 
-from flask import Flask, abort, jsonify, redirect, render_template, request
+from authlib.integrations.flask_client import OAuth
+from flask import (
+    Flask,
+    abort,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+
+# Needed to sign the session cookie. Fine to fall back locally; production
+# (Vercel) must set a real one, or every restart invalidates every session.
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-not-secret")
 
 # Vercel's filesystem is ephemeral, so production points DATABASE_URL at Neon
 # (set by the Vercel Postgres integration) instead of a local SQLite file.
@@ -19,13 +34,23 @@ app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
 db = SQLAlchemy(app)
 
-DEFAULT_USER = "me"
+oauth = OAuth(app)
+oauth.register(
+    name="google",
+    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid email profile"},
+)
+
 WINDOW = 365
 
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(60), unique=True, nullable=False)
+    google_sub = db.Column(db.String(255), unique=True, nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
 
 
 class Habit(db.Model):
@@ -77,19 +102,60 @@ def compute_streaks(days, created_on, today):
 
 
 def current_user():
-    user = User.query.filter_by(name=DEFAULT_USER).first()
+    return db.session.get(User, session["user_id"])
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
+
+    return wrapped
+
+
+@app.get("/login")
+def login():
+    if "user_id" in session:
+        return redirect("/")
+    configured = bool(oauth.google.client_id)
+    return render_template("login.html", configured=configured)
+
+
+@app.get("/auth/google")
+def auth_google():
+    return oauth.google.authorize_redirect(url_for("auth_callback", _external=True))
+
+
+@app.get("/auth/callback")
+def auth_callback():
+    token = oauth.google.authorize_access_token()
+    profile = token["userinfo"]
+
+    user = User.query.filter_by(google_sub=profile["sub"]).first()
     if not user:
-        user = User(name=DEFAULT_USER)
+        user = User(google_sub=profile["sub"], email=profile["email"], name=profile.get("name", profile["email"]))
         db.session.add(user)
         db.session.commit()
-    return user
+
+    session["user_id"] = user.id
+    return redirect("/")
+
+
+@app.post("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 
 @app.get("/")
+@login_required
 def dashboard():
     today = date.today()
     start = today - timedelta(days=WINDOW - 1)
-    habits = Habit.query.filter_by(user_id=current_user().id).order_by(Habit.id).all()
+    user = current_user()
+    habits = Habit.query.filter_by(user_id=user.id).order_by(Habit.id).all()
 
     # Per-habit day lists only; the page derives the combined graph from them, so
     # there's one source of truth for "was this done".
@@ -110,10 +176,11 @@ def dashboard():
             }
         )
 
-    return render_template("index.html", habits=rows, today=today.isoformat())
+    return render_template("index.html", habits=rows, today=today.isoformat(), user=user)
 
 
 @app.post("/habits")
+@login_required
 def add_habit():
     name = (request.form.get("name") or "").strip()[:60]
     if name:
@@ -123,6 +190,7 @@ def add_habit():
 
 
 @app.post("/habits/<int:habit_id>/delete")
+@login_required
 def delete_habit(habit_id):
     habit = db.session.get(Habit, habit_id)
     if habit and habit.user_id == current_user().id:
@@ -132,10 +200,11 @@ def delete_habit(habit_id):
 
 
 @app.post("/toggle")
+@login_required
 def toggle():
     data = request.get_json(silent=True) or {}
     habit = db.session.get(Habit, data.get("habit_id"))
-    if not habit:
+    if not habit or habit.user_id != current_user().id:
         abort(404)
     try:
         day = date.fromisoformat(data["day"])
