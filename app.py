@@ -2,7 +2,6 @@ import os
 from datetime import date, timedelta
 from functools import wraps
 
-from authlib.integrations.flask_client import OAuth
 from flask import (
     Flask,
     abort,
@@ -14,6 +13,7 @@ from flask import (
     url_for,
 )
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
@@ -34,22 +34,14 @@ app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
 db = SQLAlchemy(app)
 
-oauth = OAuth(app)
-oauth.register(
-    name="google",
-    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
-    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
-    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-    client_kwargs={"scope": "openid email profile"},
-)
-
 WINDOW = 365
+MIN_PASSWORD_LEN = 8
 
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    google_sub = db.Column(db.String(255), unique=True, nullable=False)
-    email = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(120), nullable=False)
 
 
@@ -115,29 +107,47 @@ def login_required(view):
     return wrapped
 
 
-@app.get("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if "user_id" in session:
         return redirect("/")
-    configured = bool(oauth.google.client_id)
-    return render_template("login.html", configured=configured)
+    if request.method == "GET":
+        return render_template("login.html")
+
+    email = (request.form.get("email") or "").strip().lower()
+    password = request.form.get("password") or ""
+    user = User.query.filter_by(email=email).first()
+    if not user or not check_password_hash(user.password_hash, password):
+        return render_template("login.html", error="Wrong email or password.", email=email)
+
+    session["user_id"] = user.id
+    return redirect("/")
 
 
-@app.get("/auth/google")
-def auth_google():
-    return oauth.google.authorize_redirect(url_for("auth_callback", _external=True))
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if "user_id" in session:
+        return redirect("/")
+    if request.method == "GET":
+        return render_template("signup.html")
 
+    name = (request.form.get("name") or "").strip()[:120]
+    email = (request.form.get("email") or "").strip().lower()
+    password = request.form.get("password") or ""
 
-@app.get("/auth/callback")
-def auth_callback():
-    token = oauth.google.authorize_access_token()
-    profile = token["userinfo"]
+    def fail(message):
+        return render_template("signup.html", error=message, name=name, email=email)
 
-    user = User.query.filter_by(google_sub=profile["sub"]).first()
-    if not user:
-        user = User(google_sub=profile["sub"], email=profile["email"], name=profile.get("name", profile["email"]))
-        db.session.add(user)
-        db.session.commit()
+    if not name or not email or "@" not in email:
+        return fail("Enter your name and a valid email.")
+    if len(password) < MIN_PASSWORD_LEN:
+        return fail(f"Password must be at least {MIN_PASSWORD_LEN} characters.")
+    if User.query.filter_by(email=email).first():
+        return fail("An account with that email already exists.")
+
+    user = User(email=email, name=name, password_hash=generate_password_hash(password))
+    db.session.add(user)
+    db.session.commit()
 
     session["user_id"] = user.id
     return redirect("/")
