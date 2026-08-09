@@ -13,7 +13,7 @@ export default function App() {
 
 function HeroColumn() {
   return (
-    <div className="hidden lg:flex relative flex-col items-center justify-end pb-32 px-12 rounded-3xl overflow-hidden shadow-2xl h-full w-[52%]">
+    <div className="hidden lg:flex relative flex-col items-center justify-end pb-56 px-12 rounded-3xl overflow-hidden shadow-2xl h-full w-[52%]">
       <div className="absolute inset-0 bg-brand-gray overflow-hidden">
         <div className="hero-blob hero-blob-a top-[-10%] left-[-10%] h-[60%] w-[60%] bg-white/10" />
         <div className="hero-blob hero-blob-b bottom-[-15%] right-[-10%] h-[65%] w-[65%] bg-white/[0.07]" />
