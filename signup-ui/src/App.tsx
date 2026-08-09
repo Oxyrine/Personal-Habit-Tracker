@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Circle, Github, Eye, EyeOff } from "lucide-react";
+import { Circle, GitFork, Eye, EyeOff } from "lucide-react";
 
 export default function App() {
   return (
@@ -96,7 +96,7 @@ function FormColumn() {
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          <SocialButton icon={<Github size={18} />} label="Github" />
+          <SocialButton icon={<GitFork size={18} />} label="Github" />
         </div>
 
         <div className="relative flex items-center">
