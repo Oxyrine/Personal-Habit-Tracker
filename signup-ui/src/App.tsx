@@ -14,7 +14,11 @@ export default function App() {
 function HeroColumn() {
   return (
     <div className="hidden lg:flex relative flex-col items-center justify-end pb-32 px-12 rounded-3xl overflow-hidden shadow-2xl h-full w-[52%]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,#2a2a2a,transparent_60%),radial-gradient(circle_at_80%_90%,#232323,transparent_55%)] bg-brand-gray" />
+      <div className="absolute inset-0 bg-brand-gray overflow-hidden">
+        <div className="hero-blob hero-blob-a top-[-10%] left-[-10%] h-[60%] w-[60%] bg-white/10" />
+        <div className="hero-blob hero-blob-b bottom-[-15%] right-[-10%] h-[65%] w-[65%] bg-white/[0.07]" />
+        <div className="hero-blob hero-blob-c top-[30%] left-[20%] h-[45%] w-[45%] bg-white/[0.05]" />
+      </div>
 
       <motion.div
         initial="hidden"
