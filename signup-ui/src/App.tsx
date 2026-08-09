@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Circle, GitFork, Eye, EyeOff } from "lucide-react";
+import { Circle, Github, Eye, EyeOff } from "lucide-react";
 
 export default function App() {
   return (
@@ -13,12 +13,16 @@ export default function App() {
 
 function HeroColumn() {
   return (
-    <div className="hidden lg:flex relative flex-col items-center justify-end pb-56 px-12 rounded-3xl overflow-hidden shadow-2xl h-full w-[52%]">
-      <div className="absolute inset-0 bg-brand-gray overflow-hidden">
-        <div className="hero-blob hero-blob-a top-[-10%] left-[-10%] h-[60%] w-[60%] bg-white/10" />
-        <div className="hero-blob hero-blob-b bottom-[-15%] right-[-10%] h-[65%] w-[65%] bg-white/[0.07]" />
-        <div className="hero-blob hero-blob-c top-[30%] left-[20%] h-[45%] w-[45%] bg-white/[0.05]" />
-      </div>
+    <div className="hidden lg:flex relative flex-col items-center justify-end pb-32 px-12 rounded-3xl overflow-hidden shadow-2xl h-full w-[52%]">
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_081238_406ed0e3-5d83-436e-a512-0bbff7ec5b95.mp4" type="video/mp4" />
+      </video>
 
       <motion.div
         initial="hidden"
@@ -40,7 +44,7 @@ function HeroColumn() {
           className="flex items-center gap-2"
         >
           <Circle className="fill-white text-white" size={20} />
-          <span className="text-xl font-semibold tracking-tight">Habit Tracker</span>
+          <span className="text-xl font-semibold tracking-tight">Aurora</span>
         </motion.div>
 
         <motion.div
@@ -50,10 +54,10 @@ function HeroColumn() {
           }}
         >
           <h1 className="text-4xl font-medium tracking-tight whitespace-nowrap">
-            Join Habit Tracker
+            Join Aurora
           </h1>
           <p className="text-white/60 text-sm leading-relaxed px-4 mt-2">
-            Follow these 2 quick phases to activate your space.
+            Follow these 3 quick phases to activate your space.
           </p>
         </motion.div>
 
@@ -65,7 +69,8 @@ function HeroColumn() {
           className="space-y-3"
         >
           <StepItem number={1} text="Register your identity" active />
-          <StepItem number={2} text="Finalize your profile" />
+          <StepItem number={2} text="Configure your studio" />
+          <StepItem number={3} text="Finalize your profile" />
         </motion.div>
       </motion.div>
     </div>
@@ -90,8 +95,8 @@ function FormColumn() {
           </p>
         </div>
 
-        <div>
-          <SocialButton icon={<GitFork size={18} />} label="Github" />
+        <div className="grid grid-cols-1 gap-4">
+          <SocialButton icon={<Github size={18} />} label="Github" />
         </div>
 
         <div className="relative flex items-center">
@@ -103,8 +108,8 @@ function FormColumn() {
 
         <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <InputGroup label="First name" placeholder="Ada" type="text" />
-            <InputGroup label="Last name" placeholder="Lovelace" type="text" />
+            <InputGroup label="First Name" placeholder="First Name" type="text" />
+            <InputGroup label="Last Name" placeholder="Last Name" type="text" />
           </div>
 
           <InputGroup label="Email" placeholder="you@example.com" type="email" />
@@ -181,7 +186,7 @@ function SocialButton({ icon, label }: { icon: React.ReactNode; label: string })
   return (
     <button
       type="button"
-      className="flex items-center justify-center gap-2 h-11 bg-black border border-white/10 rounded-xl hover:bg-white/5 text-sm font-medium transition"
+      className="flex items-center justify-center gap-2 w-full h-11 bg-black border border-white/10 rounded-xl hover:bg-white/5 text-sm font-medium transition"
     >
       {icon}
       {label}
