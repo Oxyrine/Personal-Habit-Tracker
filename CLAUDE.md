@@ -56,8 +56,13 @@ spec — separate npm project, own `package.json`, own Vercel project, not part 
 Flask app's deploy. `motion/react` for animation, `lucide-react` for icons (note: this
 lucide-react version ships **no brand icons** — the Github button uses `GitFork` as a
 stand-in; the Google option was dropped entirely, not just relabeled). Hero panel
-background is a CSS gradient placeholder (video generation was requested but blocked by
-workspace credits — revisit if a real video is wanted).
+background is three blurred white blobs drifting on independent CSS `@keyframes` loops
+(16s/20s/24s, `prefers-reduced-motion` respected) — a free alternative to a generated
+video; the MCP media-gen connector reports the linked account as free-plan/0 credits
+(user says the account is actually Pro, so this is an auth/sync mismatch on the
+connector, not a real credits shortage — worth reconnecting the integration if a real
+video is wanted later). Hero content block sits at `pb-56` from the bottom of the panel
+(raised once already after feedback that it sat too low).
 
 - **Live**: https://signup-ui-rose.vercel.app (Vercel project `oxyrines-projects/signup-ui`,
   connected to `Oxyrine/Personal-Habit-Tracker` `main`, root directory `signup-ui`).
