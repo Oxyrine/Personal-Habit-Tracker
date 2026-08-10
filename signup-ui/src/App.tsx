@@ -1,216 +1,382 @@
-import { useState } from "react";
-import { motion } from "motion/react";
-import { Circle, GitFork, Eye, EyeOff } from "lucide-react";
+import { useState, useRef } from "react";
+import { motion, useInView, useScroll, useTransform } from "motion/react";
+import { ArrowRight, Check } from "lucide-react";
 
 export default function App() {
   return (
-    <main className="flex min-h-screen w-full bg-black selection:bg-white/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4">
-      <HeroColumn />
-      <FormColumn />
+    <main className="w-full bg-black min-h-screen text-[#E1E0CC] selection:bg-[#E1E0CC]/30 selection:text-black">
+      <HeroSection />
+      <AboutSection />
+      <FeaturesSection />
     </main>
   );
 }
 
-function HeroColumn() {
+// ---- SECTION 1: HERO ----
+function HeroSection() {
   return (
-    <div className="hidden lg:flex relative flex-col items-center justify-end pb-32 px-12 rounded-3xl overflow-hidden shadow-2xl h-full w-[52%]">
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_081238_406ed0e3-5d83-436e-a512-0bbff7ec5b95.mp4" type="video/mp4" />
-      </video>
-
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.15, delayChildren: 0.2 },
-          },
-        }}
-        className="relative z-10 w-full max-w-xs space-y-8"
-      >
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, y: 10 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-          }}
-          className="flex items-center gap-2"
+    <section className="h-screen w-full p-4 md:p-6 relative">
+      <div className="relative w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-black">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
         >
-          <Circle className="fill-white text-white" size={20} />
-          <span className="text-xl font-semibold tracking-tight">Habit Tracker</span>
-        </motion.div>
+          <source
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4"
+            type="video/mp4"
+          />
+        </video>
+        <div className="absolute inset-0 noise-overlay opacity-[0.7] mix-blend-overlay pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 pointer-events-none" />
 
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, y: 10 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-          }}
-        >
-          <h1 className="text-4xl font-medium tracking-tight whitespace-nowrap">
-            Join Habit Tracker
-          </h1>
-          <p className="text-white/60 text-sm leading-relaxed px-4 mt-2">
-            Follow these 3 quick phases to activate your space.
-          </p>
-        </motion.div>
-
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, y: 10 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-          }}
-          className="space-y-3"
-        >
-          <StepItem number={1} text="Register your identity" active />
-          <StepItem number={2} text="Configure your studio" />
-          <StepItem number={3} text="Finalize your profile" />
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
-
-function FormColumn() {
-  const [showPassword, setShowPassword] = useState(false);
-
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center py-12 lg:py-6 px-4 sm:px-12 lg:px-16 xl:px-24 overflow-y-auto lg:overflow-hidden">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full max-w-xl space-y-8 lg:space-y-6 sm:space-y-10"
-      >
-        <div>
-          <h2 className="text-3xl font-medium tracking-tight">Create New Profile</h2>
-          <p className="text-white/40 text-sm mt-1">
-            Input your basic details to begin the journey.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4">
-          <SocialButton icon={<GitFork size={18} />} label="Github" />
-        </div>
-
-        <div className="relative flex items-center">
-          <div className="w-full border-t border-white/10" />
-          <span className="absolute left-1/2 -translate-x-1/2 bg-black px-4 text-xs font-medium text-white/40 uppercase tracking-widest">
-            Or
-          </span>
-        </div>
-
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <InputGroup label="First Name" placeholder="First Name" type="text" />
-            <InputGroup label="Last Name" placeholder="Last Name" type="text" />
-          </div>
-
-          <InputGroup label="Email" placeholder="you@example.com" type="email" />
-
-          <div>
-            <label className="text-sm font-medium text-white">Password</label>
-            <div className="relative mt-1.5">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                className="w-full bg-brand-gray border-none rounded-xl h-11 px-4 pr-11 text-white placeholder:text-white/20 focus:ring-2 focus:ring-white/20 outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20">
+          <nav className="bg-black rounded-b-2xl md:rounded-b-3xl px-4 py-2 md:px-8 flex items-center gap-3 sm:gap-6 md:gap-12 lg:gap-14">
+            {["Our story", "Collective", "Workshops", "Programs", "Inquiries"].map((item) => (
+              <a
+                key={item}
+                href="#"
+                className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
+                style={{ color: "rgba(225, 224, 204, 0.8)" }}
+                onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+                {item}
+              </a>
+            ))}
+          </nav>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 lg:p-16 xl:p-20 z-10 pb-8 md:pb-12">
+          <div className="grid grid-cols-12 gap-6 items-end">
+            <div className="col-span-12 md:col-span-8">
+              <WordsPullUp
+                text="Prisma"
+                className="text-[26vw] sm:text-[24vw] md:text-[22vw] lg:text-[20vw] xl:text-[19vw] 2xl:text-[20vw] font-medium leading-[0.85] tracking-[-0.07em] text-[#E1E0CC]"
+                showAsterisk
+              />
             </div>
-            <p className="text-xs text-white/30 mt-1.5">Requires at least 8 symbols.</p>
+            <div className="col-span-12 md:col-span-4 flex flex-col gap-8 md:pb-8">
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="text-primary/70 text-xs sm:text-sm md:text-base leading-[1.2]"
+              >
+                Prisma is a worldwide network of visual artists, filmmakers and storytellers bound
+                not by place, status or labels but by passion and hunger to unlock potential
+                through our unique perspectives.
+              </motion.p>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <button className="group flex items-center justify-between gap-2 bg-primary rounded-full pl-6 pr-2 py-2 text-black font-medium text-sm sm:text-base hover:gap-3 transition-all duration-300">
+                  Join the lab
+                  <div className="bg-black rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[#E1E0CC] group-hover:scale-110 transition-transform duration-300">
+                    <ArrowRight size={18} />
+                  </div>
+                </button>
+              </motion.div>
+            </div>
           </div>
-
-          <button
-            type="submit"
-            className="w-full h-14 bg-white text-black font-semibold rounded-xl hover:bg-white/90 active:scale-[0.98] mt-4 transition"
-          >
-            Create Account
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-white/40">
-          Member of the team?{" "}
-          <a href="#" className="text-white hover:underline">
-            Log in
-          </a>
-        </p>
-      </motion.div>
-    </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-function StepItem({
-  number,
+// ---- SECTION 2: ABOUT ----
+function AboutSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start 0.8", "end 0.2"],
+  });
+
+  const bodyText =
+    "Over the last seven years, I have worked with Parallax, a Berlin-based production house that crafts cinema, series, and Noir Studio in Paris. Together, we have created work that has earned international acclaim at several major festivals.";
+  const chars = bodyText.split("");
+
+  return (
+    <section className="w-full bg-black py-24 px-4 md:px-6">
+      <div className="bg-[#101010] rounded-2xl md:rounded-[2rem] p-8 md:p-16 lg:p-24 flex flex-col items-center text-center max-w-6xl mx-auto">
+        <span className="text-primary text-[10px] sm:text-xs uppercase tracking-widest mb-12">
+          Visual arts
+        </span>
+        
+        <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl max-w-3xl mx-auto leading-[0.95] sm:leading-[0.9] mb-16 text-[#E1E0CC]">
+          <WordsPullUpMultiStyle
+            segments={[
+              { text: "I am Marcus Chen, ", className: "font-normal" },
+              { text: "a self-taught director. ", className: "font-serif italic" },
+              { text: "I have skills in color grading, visual effects, and narrative design.", className: "font-normal" }
+            ]}
+          />
+        </div>
+
+        <div ref={containerRef} className="max-w-xl mx-auto flex flex-wrap justify-center text-center">
+          <p className="text-[#DEDBC8] text-xs sm:text-sm md:text-base leading-relaxed">
+            {chars.map((char, i) => {
+              const charProgress = i / chars.length;
+              const start = Math.max(0, charProgress - 0.1);
+              const end = Math.min(1, charProgress + 0.05);
+              
+              return (
+                <AnimatedLetter
+                  key={i}
+                  char={char}
+                  progress={scrollYProgress}
+                  range={[start, end]}
+                />
+              );
+            })}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AnimatedLetter({ char, progress, range }: any) {
+  const opacity = useTransform(progress, range, [0.2, 1]);
+  return <motion.span style={{ opacity }}>{char}</motion.span>;
+}
+
+// ---- SECTION 3: FEATURES ----
+function FeaturesSection() {
+  return (
+    <section className="w-full min-h-screen bg-black relative py-24 px-4 md:px-6 overflow-hidden">
+      <div className="absolute inset-0 bg-noise opacity-[0.15] pointer-events-none mix-blend-overlay" />
+      
+      <div className="relative z-10 max-w-[1400px] mx-auto">
+        <div className="mb-16">
+          <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal leading-tight">
+            <WordsPullUpMultiStyle
+              segments={[
+                { text: "Studio-grade workflows for visionary creators.", className: "text-[#E1E0CC] block mb-2" },
+                { text: "Built for pure vision. Powered by art.", className: "text-gray-500 block" }
+              ]}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-2 md:gap-1">
+          <FeatureCard index={0}>
+            <div className="relative w-full h-full min-h-[300px] lg:h-[480px] rounded-2xl md:rounded-3xl overflow-hidden bg-[#212121]">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              >
+                <source
+                  src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4"
+                  type="video/mp4"
+                />
+              </video>
+              <div className="absolute bottom-6 left-6 z-10">
+                <span className="text-[#E1E0CC] text-sm md:text-base font-medium">Your creative canvas.</span>
+              </div>
+            </div>
+          </FeatureCard>
+
+          <FeatureCard index={1}>
+            <div className="w-full h-full min-h-[300px] lg:h-[480px] rounded-2xl md:rounded-3xl bg-[#212121] p-6 flex flex-col justify-between">
+              <div>
+                <img
+                  src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260405_171918_4a5edc79-d78f-4637-ac8b-53c43c220606.png&w=1280&q=85"
+                  alt="Icon"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
+                />
+                <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
+                  Project Storyboard. <span className="text-gray-500 text-sm">(01)</span>
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    "Visualize scene flows",
+                    "Manage shot lists",
+                    "Asset tracking system",
+                    "Real-time collaboration"
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Check className="text-primary shrink-0 mt-0.5" size={16} />
+                      <span className="text-gray-400 text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <a href="#" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
+                Learn more <ArrowRight size={14} className="-rotate-45" />
+              </a>
+            </div>
+          </FeatureCard>
+
+          <FeatureCard index={2}>
+            <div className="w-full h-full min-h-[300px] lg:h-[480px] rounded-2xl md:rounded-3xl bg-[#212121] p-6 flex flex-col justify-between">
+              <div>
+                <img
+                  src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260405_171741_ed9845ab-f5b2-4018-8ce7-07cc01823522.png&w=1280&q=85"
+                  alt="Icon"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
+                />
+                <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
+                  Smart Critiques. <span className="text-gray-500 text-sm">(02)</span>
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    "AI-powered analysis",
+                    "Automated creative notes",
+                    "NLE tool integrations"
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Check className="text-primary shrink-0 mt-0.5" size={16} />
+                      <span className="text-gray-400 text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <a href="#" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
+                Learn more <ArrowRight size={14} className="-rotate-45" />
+              </a>
+            </div>
+          </FeatureCard>
+
+          <FeatureCard index={3}>
+            <div className="w-full h-full min-h-[300px] lg:h-[480px] rounded-2xl md:rounded-3xl bg-[#212121] p-6 flex flex-col justify-between">
+              <div>
+                <img
+                  src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260405_171809_f56666dc-c099-4778-ad82-9ad4f209567b.png&w=1280&q=85"
+                  alt="Icon"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
+                />
+                <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
+                  Immersion Capsule. <span className="text-gray-500 text-sm">(03)</span>
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    "Total notification silencing",
+                    "Ambient soundscapes",
+                    "Calendar schedule syncing"
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Check className="text-primary shrink-0 mt-0.5" size={16} />
+                      <span className="text-gray-400 text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <a href="#" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
+                Learn more <ArrowRight size={14} className="-rotate-45" />
+              </a>
+            </div>
+          </FeatureCard>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeatureCard({ children, index }: { children: React.ReactNode; index: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+      transition={{
+        duration: 0.8,
+        delay: index * 0.15,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className="w-full h-full"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ---- SHARED COMPONENTS ----
+function WordsPullUp({
   text,
-  active = false,
+  className = "",
+  showAsterisk = false,
 }: {
-  number: number;
   text: string;
-  active?: boolean;
+  className?: string;
+  showAsterisk?: boolean;
 }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  const words = text.split(" ");
+
   return (
-    <div
-      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm ${
-        active
-          ? "bg-white text-black border border-white"
-          : "bg-brand-gray text-white border-none"
-      }`}
-    >
-      <span
-        className={`flex h-6 w-6 flex-none items-center justify-center rounded-full text-xs font-medium ${
-          active ? "bg-black text-white" : "bg-white/10 text-white/40"
-        }`}
-      >
-        {number}
-      </span>
-      {text}
+    <div ref={ref} className={`flex flex-wrap ${className}`}>
+      {words.map((word, i) => (
+        <span key={i} className="relative inline-flex overflow-hidden mr-[0.25em]">
+          <motion.span
+            initial={{ y: 20, opacity: 0 }}
+            animate={isInView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+            transition={{
+              duration: 0.8,
+              delay: i * 0.08,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="inline-block relative"
+          >
+            {word}
+            {showAsterisk && i === words.length - 1 && (
+              <span className="absolute top-[0.65em] -right-[0.3em] text-[0.31em] leading-none">
+                *
+              </span>
+            )}
+          </motion.span>
+        </span>
+      ))}
     </div>
   );
 }
 
-function SocialButton({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <button
-      type="button"
-      className="flex items-center justify-center gap-2 w-full h-11 bg-black border border-white/10 rounded-xl hover:bg-white/5 text-sm font-medium transition"
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
+function WordsPullUpMultiStyle({ segments }: { segments: { text: string; className: string }[] }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  let globalWordIndex = 0;
 
-function InputGroup({
-  label,
-  placeholder,
-  type,
-}: {
-  label: string;
-  placeholder: string;
-  type: string;
-}) {
   return (
-    <div>
-      <label className="text-sm font-medium text-white">{label}</label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        className="w-full mt-1.5 bg-brand-gray border-none rounded-xl h-11 px-4 text-white placeholder:text-white/20 focus:ring-2 focus:ring-white/20 outline-none"
-      />
+    <div ref={ref} className="inline-flex flex-wrap justify-center">
+      {segments.map((segment, segIdx) => {
+        const words = segment.text.split(" ").filter((w) => w.length > 0);
+        return (
+          <span key={segIdx} className={segment.className}>
+            {words.map((word, wIdx) => {
+              const currentIdx = globalWordIndex++;
+              return (
+                <span key={wIdx} className="inline-flex overflow-hidden mr-[0.25em] relative">
+                  <motion.span
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={isInView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+                    transition={{
+                      duration: 0.8,
+                      delay: currentIdx * 0.08,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className="inline-block"
+                  >
+                    {word}
+                  </motion.span>
+                </span>
+              );
+            })}
+          </span>
+        );
+      })}
     </div>
   );
 }
