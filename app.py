@@ -6,28 +6,18 @@ from flask import (
     Flask,
     abort,
     jsonify,
-    redirect,
-    render_template,
     request,
     session,
-    url_for,
 )
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
-# Needed to sign the session cookie. Fine to fall back locally; production
-# (Vercel) must set a real one, or every restart invalidates every session.
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-not-secret")
-
-# Vercel's filesystem is ephemeral, so production points DATABASE_URL at Neon
-# (set by the Vercel Postgres integration) instead of a local SQLite file.
-# Local dev needs neither an env var nor a network connection: it falls back
-# to a SQLite file next to app.py.
 db_url = os.environ.get("DATABASE_URL")
 if db_url:
-    db_url = db_url.replace("postgres://", "postgresql://", 1)  # SQLAlchemy 2.x requirement
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
 else:
     db_url = "sqlite:///" + os.path.join(app.root_path, "habits.db")
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
@@ -37,138 +27,112 @@ db = SQLAlchemy(app)
 WINDOW = 365
 MIN_PASSWORD_LEN = 8
 
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(120), nullable=False)
 
-
 class Habit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(60), nullable=False)
     created_on = db.Column(db.Date, nullable=False, default=date.today)
-    logs = db.relationship(
-        "Log", backref="habit", cascade="all, delete-orphan", lazy="selectin"
-    )
-
+    logs = db.relationship("Log", backref="habit", cascade="all, delete-orphan", lazy="selectin")
 
 class Log(db.Model):
-    """A row exists <=> the habit was completed that day. No boolean needed."""
-
     id = db.Column(db.Integer, primary_key=True)
     habit_id = db.Column(db.Integer, db.ForeignKey("habit.id"), nullable=False)
     day = db.Column(db.Date, nullable=False, index=True)
     __table_args__ = (db.UniqueConstraint("habit_id", "day"),)
 
-
-# create_all() is idempotent (checks what exists before creating), so running
-# it at import time is safe on every cold start and keeps local `python app.py`
-# working with zero setup.
 with app.app_context():
     db.create_all()
 
-
 def compute_streaks(days, created_on, today):
-    """(current, longest) for a set of completed dates, counted from created_on."""
     days = {d for d in days if d >= created_on}
     if not days:
         return 0, 0
-
     longest = run = 0
     prev = None
     for d in sorted(days):
         run = run + 1 if prev and (d - prev).days == 1 else 1
         longest = max(longest, run)
         prev = d
-
-    # Not ticking today yet shouldn't zero out a live streak.
     cursor = today if today in days else today - timedelta(days=1)
     current = 0
-    while cursor in days:  # already filtered, so it stops at created_on
+    while cursor in days:
         current += 1
         cursor -= timedelta(days=1)
     return current, longest
 
-
 def current_user():
     return db.session.get(User, session["user_id"])
-
 
 def login_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
-            return redirect(url_for("login"))
+            return jsonify({"error": "Unauthorized"}), 401
         return view(*args, **kwargs)
-
     return wrapped
 
+@app.route("/api/auth/status", methods=["GET"])
+def auth_status():
+    if "user_id" not in session:
+        return jsonify({"authenticated": False})
+    user = current_user()
+    if not user:
+        session.clear()
+        return jsonify({"authenticated": False})
+    return jsonify({"authenticated": True, "user": {"id": user.id, "name": user.name, "email": user.email}})
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/api/login", methods=["POST"])
 def login():
-    if "user_id" in session:
-        return redirect("/old-dashboard")
-    if request.method == "GET":
-        return render_template("login.html")
-
-    email = (request.form.get("email") or "").strip().lower()
-    password = request.form.get("password") or ""
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
     user = User.query.filter_by(email=email).first()
     if not user or not check_password_hash(user.password_hash, password):
-        return render_template("login.html", error="Wrong email or password.", email=email)
+        return jsonify({"error": "Wrong email or password"}), 400
 
     session["user_id"] = user.id
-    return redirect("/old-dashboard")
+    return jsonify({"success": True})
 
-
-@app.route("/signup", methods=["GET", "POST"])
+@app.route("/api/signup", methods=["POST"])
 def signup():
-    if "user_id" in session:
-        return redirect("/old-dashboard")
-    if request.method == "GET":
-        return render_template("signup.html")
-
-    name = (request.form.get("name") or "").strip()[:120]
-    email = (request.form.get("email") or "").strip().lower()
-    password = request.form.get("password") or ""
-
-    def fail(message):
-        return render_template("signup.html", error=message, name=name, email=email)
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()[:120]
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
 
     if not name or not email or "@" not in email:
-        return fail("Enter your name and a valid email.")
+        return jsonify({"error": "Enter your name and a valid email"}), 400
     if len(password) < MIN_PASSWORD_LEN:
-        return fail(f"Password must be at least {MIN_PASSWORD_LEN} characters.")
+        return jsonify({"error": f"Password must be at least {MIN_PASSWORD_LEN} characters"}), 400
     if User.query.filter_by(email=email).first():
-        return fail("An account with that email already exists.")
+        return jsonify({"error": "An account with that email already exists"}), 400
 
     user = User(email=email, name=name, password_hash=generate_password_hash(password))
     db.session.add(user)
     db.session.commit()
 
     session["user_id"] = user.id
-    return redirect("/old-dashboard")
+    return jsonify({"success": True})
 
-
-@app.post("/logout")
+@app.route("/api/logout", methods=["POST"])
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    return jsonify({"success": True})
 
-
-@app.get("/old-dashboard")
+@app.route("/api/habits", methods=["GET"])
 @login_required
-def dashboard():
+def get_habits():
     today = date.today()
     start = today - timedelta(days=WINDOW - 1)
     user = current_user()
     habits = Habit.query.filter_by(user_id=user.id).order_by(Habit.id).all()
 
-    # Per-habit day lists only; the page derives the combined graph from them, so
-    # there's one source of truth for "was this done".
     rows = []
     for h in habits:
         days = {log.day for log in h.logs}
@@ -185,31 +149,28 @@ def dashboard():
                 "days": sorted(d.isoformat() for d in days if d >= start),
             }
         )
+    return jsonify({"habits": rows, "today": today.isoformat()})
 
-    return render_template("index.html", habits=rows, today=today.isoformat(), user=user)
-
-
-@app.post("/habits")
+@app.route("/api/habits", methods=["POST"])
 @login_required
 def add_habit():
-    name = (request.form.get("name") or "").strip()[:60]
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()[:60]
     if name:
         db.session.add(Habit(user_id=current_user().id, name=name))
         db.session.commit()
-    return redirect("/old-dashboard")
+    return jsonify({"success": True})
 
-
-@app.post("/habits/<int:habit_id>/delete")
+@app.route("/api/habits/<int:habit_id>/delete", methods=["POST"])
 @login_required
 def delete_habit(habit_id):
     habit = db.session.get(Habit, habit_id)
     if habit and habit.user_id == current_user().id:
-        db.session.delete(habit)  # cascade takes the logs with it
+        db.session.delete(habit)
         db.session.commit()
-    return redirect("/old-dashboard")
+    return jsonify({"success": True})
 
-
-@app.post("/toggle")
+@app.route("/api/toggle", methods=["POST"])
 @login_required
 def toggle():
     data = request.get_json(silent=True) or {}
@@ -241,7 +202,6 @@ def toggle():
         longest=longest,
         total=sum(1 for d in days if d >= habit.created_on),
     )
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
