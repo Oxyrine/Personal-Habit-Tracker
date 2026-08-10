@@ -159,7 +159,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.get("/")
+@app.get("/old-dashboard")
 @login_required
 def dashboard():
     today = date.today()
