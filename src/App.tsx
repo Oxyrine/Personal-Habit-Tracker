@@ -34,10 +34,10 @@ function HeroSection() {
 
         <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20">
           <nav className="bg-black rounded-b-2xl md:rounded-b-3xl px-4 py-2 md:px-8 flex items-center gap-3 sm:gap-6 md:gap-12 lg:gap-14">
-            {["Our story", "Collective", "Workshops", "Programs", "Inquiries"].map((item) => (
+            {["Overview", "Methodology", "Features", "Sign In"].map((item) => (
               <a
                 key={item}
-                href="#"
+                href={item === "Sign In" ? "/login" : "#"}
                 className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
                 style={{ color: "rgba(225, 224, 204, 0.8)" }}
                 onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
@@ -53,7 +53,7 @@ function HeroSection() {
           <div className="grid grid-cols-12 gap-6 items-end">
             <div className="col-span-12 md:col-span-8">
               <WordsPullUp
-                text="Prisma"
+                text="Habits"
                 className="text-[26vw] sm:text-[24vw] md:text-[22vw] lg:text-[20vw] xl:text-[19vw] 2xl:text-[20vw] font-medium leading-[0.85] tracking-[-0.07em] text-[#E1E0CC]"
                 showAsterisk
               />
@@ -65,9 +65,8 @@ function HeroSection() {
                 transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="text-primary/70 text-xs sm:text-sm md:text-base leading-[1.2]"
               >
-                Prisma is a worldwide network of visual artists, filmmakers and storytellers bound
-                not by place, status or labels but by passion and hunger to unlock potential
-                through our unique perspectives.
+                A minimalist, focused space to build routines, track progress, and unlock your 
+                potential through daily discipline. No distractions, just consistency.
               </motion.p>
               
               <motion.div
@@ -75,12 +74,12 @@ function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
               >
-                <button className="group flex items-center justify-between gap-2 bg-primary rounded-full pl-6 pr-2 py-2 text-black font-medium text-sm sm:text-base hover:gap-3 transition-all duration-300">
-                  Join the lab
+                <a href="/signup" className="group inline-flex items-center justify-between gap-2 bg-primary rounded-full pl-6 pr-2 py-2 text-black font-medium text-sm sm:text-base hover:gap-3 transition-all duration-300">
+                  Start tracking
                   <div className="bg-black rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[#E1E0CC] group-hover:scale-110 transition-transform duration-300">
                     <ArrowRight size={18} />
                   </div>
-                </button>
+                </a>
               </motion.div>
             </div>
           </div>
@@ -99,22 +98,22 @@ function AboutSection() {
   });
 
   const bodyText =
-    "Over the last seven years, I have worked with Parallax, a Berlin-based production house that crafts cinema, series, and Noir Studio in Paris. Together, we have created work that has earned international acclaim at several major festivals.";
+    "Over the last few years, we realized that the key to achieving any goal isn't motivation—it's building an unbreakable routine. We built this tracker to give you a clear, distraction-free environment to monitor your daily habits and visualize your long-term progress.";
   const chars = bodyText.split("");
 
   return (
     <section className="w-full bg-black py-24 px-4 md:px-6">
       <div className="bg-[#101010] rounded-2xl md:rounded-[2rem] p-8 md:p-16 lg:p-24 flex flex-col items-center text-center max-w-6xl mx-auto">
         <span className="text-primary text-[10px] sm:text-xs uppercase tracking-widest mb-12">
-          Visual arts
+          Discipline
         </span>
         
         <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl max-w-3xl mx-auto leading-[0.95] sm:leading-[0.9] mb-16 text-[#E1E0CC]">
           <WordsPullUpMultiStyle
             segments={[
-              { text: "I am Marcus Chen, ", className: "font-normal" },
-              { text: "a self-taught director. ", className: "font-serif italic" },
-              { text: "I have skills in color grading, visual effects, and narrative design.", className: "font-normal" }
+              { text: "We believe that ", className: "font-normal" },
+              { text: "consistency is everything. ", className: "font-serif italic" },
+              { text: "Track daily, build streaks, and transform your life.", className: "font-normal" }
             ]}
           />
         </div>
@@ -158,8 +157,8 @@ function FeaturesSection() {
           <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal leading-tight">
             <WordsPullUpMultiStyle
               segments={[
-                { text: "Studio-grade workflows for visionary creators.", className: "text-[#E1E0CC] block mb-2" },
-                { text: "Built for pure vision. Powered by art.", className: "text-gray-500 block" }
+                { text: "Distraction-free tracking for ambitious goals.", className: "text-[#E1E0CC] block mb-2" },
+                { text: "Built for focus. Powered by consistency.", className: "text-gray-500 block" }
               ]}
             />
           </div>
@@ -181,7 +180,7 @@ function FeaturesSection() {
                 />
               </video>
               <div className="absolute bottom-6 left-6 z-10">
-                <span className="text-[#E1E0CC] text-sm md:text-base font-medium">Your creative canvas.</span>
+                <span className="text-[#E1E0CC] text-sm md:text-base font-medium">Your daily canvas.</span>
               </div>
             </div>
           </FeatureCard>
@@ -195,14 +194,14 @@ function FeaturesSection() {
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
                 />
                 <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
-                  Project Storyboard. <span className="text-gray-500 text-sm">(01)</span>
+                  Visual Heatmaps. <span className="text-gray-500 text-sm">(01)</span>
                 </h3>
                 <ul className="space-y-4">
                   {[
-                    "Visualize scene flows",
-                    "Manage shot lists",
-                    "Asset tracking system",
-                    "Real-time collaboration"
+                    "Track daily completions",
+                    "Visualize 365-day progress",
+                    "Identify success patterns",
+                    "Maintain your streaks"
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <Check className="text-primary shrink-0 mt-0.5" size={16} />
@@ -226,13 +225,13 @@ function FeaturesSection() {
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
                 />
                 <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
-                  Smart Critiques. <span className="text-gray-500 text-sm">(02)</span>
+                  Unbreakable Streaks. <span className="text-gray-500 text-sm">(02)</span>
                 </h3>
                 <ul className="space-y-4">
                   {[
-                    "AI-powered analysis",
-                    "Automated creative notes",
-                    "NLE tool integrations"
+                    "Longest streak tracking",
+                    "Current run metrics",
+                    "Total days completed"
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <Check className="text-primary shrink-0 mt-0.5" size={16} />
@@ -256,13 +255,13 @@ function FeaturesSection() {
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
                 />
                 <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
-                  Immersion Capsule. <span className="text-gray-500 text-sm">(03)</span>
+                  Deep Focus. <span className="text-gray-500 text-sm">(03)</span>
                 </h3>
                 <ul className="space-y-4">
                   {[
-                    "Total notification silencing",
-                    "Ambient soundscapes",
-                    "Calendar schedule syncing"
+                    "Distraction-free interface",
+                    "Dark mode optimized",
+                    "Lightning fast logging"
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <Check className="text-primary shrink-0 mt-0.5" size={16} />
