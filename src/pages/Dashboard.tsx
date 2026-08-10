@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { LogOut, Plus, Trash2, Check } from "lucide-react";
 import { motion } from "motion/react";
+import Heatmap from "../components/Heatmap";
 
 interface Habit {
   id: number;
@@ -234,7 +235,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex items-center justify-between">
+                    <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex items-center justify-between mb-8">
                       <span className="text-[#E1E0CC] font-medium">Done today?</span>
                       <button
                         onClick={() => handleToggle(habit.id, today)}
@@ -244,6 +245,11 @@ export default function Dashboard() {
                       >
                         <Check size={20} />
                       </button>
+                    </div>
+
+                    <div className="bg-[#101010] p-6 md:p-8 rounded-3xl border border-white/5 overflow-hidden">
+                      <h3 className="text-lg font-medium mb-6 text-[#E1E0CC]">Activity Heatmap</h3>
+                      <Heatmap days={habit.days} today={today} />
                     </div>
                   </div>
                 );
