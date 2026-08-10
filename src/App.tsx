@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { ArrowRight, Check } from "lucide-react";
 
