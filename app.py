@@ -110,7 +110,7 @@ def login_required(view):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if "user_id" in session:
-        return redirect("/")
+        return redirect("/old-dashboard")
     if request.method == "GET":
         return render_template("login.html")
 
@@ -121,13 +121,13 @@ def login():
         return render_template("login.html", error="Wrong email or password.", email=email)
 
     session["user_id"] = user.id
-    return redirect("/")
+    return redirect("/old-dashboard")
 
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if "user_id" in session:
-        return redirect("/")
+        return redirect("/old-dashboard")
     if request.method == "GET":
         return render_template("signup.html")
 
@@ -150,7 +150,7 @@ def signup():
     db.session.commit()
 
     session["user_id"] = user.id
-    return redirect("/")
+    return redirect("/old-dashboard")
 
 
 @app.post("/logout")
@@ -196,7 +196,7 @@ def add_habit():
     if name:
         db.session.add(Habit(user_id=current_user().id, name=name))
         db.session.commit()
-    return redirect("/")
+    return redirect("/old-dashboard")
 
 
 @app.post("/habits/<int:habit_id>/delete")
@@ -206,7 +206,7 @@ def delete_habit(habit_id):
     if habit and habit.user_id == current_user().id:
         db.session.delete(habit)  # cascade takes the logs with it
         db.session.commit()
-    return redirect("/")
+    return redirect("/old-dashboard")
 
 
 @app.post("/toggle")
