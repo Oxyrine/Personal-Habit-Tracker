@@ -5,11 +5,17 @@ import { Link } from "react-router-dom";
 
 export default function Landing() {
   return (
-    <main className="w-full bg-black min-h-screen text-[#E1E0CC] selection:bg-[#E1E0CC]/30 selection:text-black">
+    <motion.main 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, filter: "blur(10px)" }}
+      transition={{ duration: 0.5 }}
+      className="w-full bg-black min-h-screen text-[#E1E0CC] selection:bg-[#E1E0CC]/30 selection:text-black"
+    >
       <HeroSection />
       <AboutSection />
       <FeaturesSection />
-    </main>
+    </motion.main>
   );
 }
 

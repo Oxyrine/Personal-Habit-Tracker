@@ -35,7 +35,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-[#E1E0CC] flex flex-col justify-center items-center p-6 font-sans relative overflow-hidden">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen bg-black text-[#E1E0CC] flex flex-col justify-center items-center p-6 font-sans relative overflow-hidden"
+    >
       <Link to="/" className="absolute top-8 left-8 flex items-center gap-2 text-gray-500 hover:text-[#E1E0CC] transition-colors">
         <ArrowLeft size={16} /> Back
       </Link>
@@ -91,6 +97,6 @@ export default function Login() {
           Don't have an account? <Link to="/signup" className="text-[#E1E0CC] hover:text-primary transition-colors">Sign up</Link>
         </p>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

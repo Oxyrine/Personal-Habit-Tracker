@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { LogOut, Plus, Trash2, Check } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import Heatmap from "../components/Heatmap";
 
 interface Habit {
@@ -107,7 +107,13 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-[#E1E0CC] font-sans flex flex-col md:flex-row">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen bg-black text-[#E1E0CC] font-sans flex flex-col md:flex-row"
+    >
       {/* Sidebar */}
       <aside className="w-full md:w-64 lg:w-72 border-r border-white/5 bg-[#0a0a0a] flex flex-col h-auto md:h-screen sticky top-0">
         <div className="p-6">
@@ -168,96 +174,95 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-black p-6 md:p-12 lg:p-16">
         <div className="max-w-4xl mx-auto">
-          {activeView === "overview" && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-              <div className="mb-12">
-                <h1 className="text-3xl md:text-4xl font-medium mb-2 tracking-tight">Today</h1>
-                <p className="text-gray-500">{today}</p>
-              </div>
+          <AnimatePresence mode="wait">
+            {activeView === "overview" ? (
+              <motion.div key="overview" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+                <div className="mb-12">
+                  <h1 className="text-3xl md:text-4xl font-medium mb-2 tracking-tight">Today</h1>
+                  <p className="text-gray-500">{today}</p>
+                </div>
 
-              <div className="bg-[#101010] border border-white/5 rounded-3xl p-6 md:p-10 shadow-2xl">
-                {habits.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No habits yet. Add one in the sidebar.</p>
-                ) : (
-                  <div className="space-y-4">
-                    {habits.map(habit => (
-                      <div key={habit.id} className="flex items-center justify-between p-4 rounded-2xl bg-[#1a1a1a] border border-white/5 hover:border-primary/20 transition-colors group">
-                        <span className={`text-lg font-medium transition-colors ${habit.done ? 'text-gray-500 line-through' : 'text-[#E1E0CC]'}`}>
-                          {habit.name}
-                        </span>
+                <div className="bg-[#101010] border border-white/5 rounded-3xl p-6 md:p-10 shadow-2xl">
+                  {habits.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">No habits yet. Add one in the sidebar.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {habits.map(habit => (
+                        <div key={habit.id} className="flex items-center justify-between p-4 rounded-2xl bg-[#1a1a1a] border border-white/5 hover:border-primary/20 transition-colors group">
+                          <span className={`text-lg font-medium transition-colors ${habit.done ? 'text-gray-500 line-through' : 'text-[#E1E0CC]'}`}>
+                            {habit.name}
+                          </span>
+                          <button
+                            onClick={() => handleToggle(habit.id, today)}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                              habit.done ? 'bg-primary text-black' : 'bg-[#2a2a2a] text-transparent hover:border-primary/50 border border-transparent'
+                            }`}
+                          >
+                            <Check size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ) : habits.find(h => h.id === activeView) ? (
+              <motion.div key={`habit-${activeView}`} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+                {(() => {
+                  const habit = habits.find(h => h.id === activeView)!;
+                  return (
+                    <div>
+                      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
+                        <div>
+                          <h1 className="text-3xl md:text-4xl font-medium mb-2 tracking-tight">{habit.name}</h1>
+                          <p className="text-gray-500 text-sm">Tracked since {habit.created_on}</p>
+                        </div>
+                        <button onClick={() => handleDelete(habit.id)} className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 bg-red-950/20 px-4 py-2 rounded-full transition-colors self-start sm:self-auto border border-red-900/30">
+                          <Trash2 size={16} /> Delete
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                        <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
+                          <span className="text-4xl font-medium text-primary mb-1">{habit.current}</span>
+                          <span className="text-xs text-gray-500 uppercase tracking-widest">Current Streak</span>
+                        </div>
+                        <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
+                          <span className="text-4xl font-medium text-[#E1E0CC] mb-1">{habit.longest}</span>
+                          <span className="text-xs text-gray-500 uppercase tracking-widest">Longest Streak</span>
+                        </div>
+                        <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
+                          <span className="text-4xl font-medium text-[#E1E0CC] mb-1">{habit.total}</span>
+                          <span className="text-xs text-gray-500 uppercase tracking-widest">Total Days</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex items-center justify-between mb-8">
+                        <span className="text-[#E1E0CC] font-medium">Done today?</span>
                         <button
                           onClick={() => handleToggle(habit.id, today)}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                             habit.done ? 'bg-primary text-black' : 'bg-[#2a2a2a] text-transparent hover:border-primary/50 border border-transparent'
                           }`}
                         >
-                          <Check size={16} />
+                          <Check size={20} />
                         </button>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
 
-          {activeView !== "overview" && habits.find(h => h.id === activeView) && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-              {(() => {
-                const habit = habits.find(h => h.id === activeView)!;
-                return (
-                  <div>
-                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
-                      <div>
-                        <h1 className="text-3xl md:text-4xl font-medium mb-2 tracking-tight">{habit.name}</h1>
-                        <p className="text-gray-500 text-sm">Tracked since {habit.created_on}</p>
-                      </div>
-                      <button onClick={() => handleDelete(habit.id)} className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 bg-red-950/20 px-4 py-2 rounded-full transition-colors self-start sm:self-auto border border-red-900/30">
-                        <Trash2 size={16} /> Delete
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                      <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
-                        <span className="text-4xl font-medium text-primary mb-1">{habit.current}</span>
-                        <span className="text-xs text-gray-500 uppercase tracking-widest">Current Streak</span>
-                      </div>
-                      <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
-                        <span className="text-4xl font-medium text-[#E1E0CC] mb-1">{habit.longest}</span>
-                        <span className="text-xs text-gray-500 uppercase tracking-widest">Longest Streak</span>
-                      </div>
-                      <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
-                        <span className="text-4xl font-medium text-[#E1E0CC] mb-1">{habit.total}</span>
-                        <span className="text-xs text-gray-500 uppercase tracking-widest">Total Days</span>
+                      <div className="bg-[#101010] p-6 md:p-8 rounded-3xl border border-white/5 overflow-hidden">
+                        <h3 className="text-lg font-medium mb-6 text-[#E1E0CC]">Activity Heatmap</h3>
+                        <Heatmap days={habit.days} today={today} />
                       </div>
                     </div>
-
-                    <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex items-center justify-between mb-8">
-                      <span className="text-[#E1E0CC] font-medium">Done today?</span>
-                      <button
-                        onClick={() => handleToggle(habit.id, today)}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                          habit.done ? 'bg-primary text-black' : 'bg-[#2a2a2a] text-transparent hover:border-primary/50 border border-transparent'
-                        }`}
-                      >
-                        <Check size={20} />
-                      </button>
-                    </div>
-
-                    <div className="bg-[#101010] p-6 md:p-8 rounded-3xl border border-white/5 overflow-hidden">
-                      <h3 className="text-lg font-medium mb-6 text-[#E1E0CC]">Activity Heatmap</h3>
-                      <Heatmap days={habit.days} today={today} />
-                    </div>
-                  </div>
-                );
-              })()}
-            </motion.div>
-          )}
+                  );
+                })()}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 }
