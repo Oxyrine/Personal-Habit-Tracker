@@ -10,7 +10,7 @@ export default function Landing() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, filter: "blur(10px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full bg-black min-h-screen text-[#E1E0CC] selection:bg-[#E1E0CC]/30 selection:text-black"
+      className="w-full bg-black min-h-dvh text-[#E1E0CC] selection:bg-[#E1E0CC]/30 selection:text-black"
     >
       <HeroSection />
       <AboutSection />
@@ -19,10 +19,16 @@ export default function Landing() {
   );
 }
 
+const NAV_ITEMS = [
+  { label: "Overview", href: "#top" },
+  { label: "Methodology", href: "#about" },
+  { label: "Features", href: "#features" },
+];
+
 // ---- SECTION 1: HERO ----
 function HeroSection() {
   return (
-    <section className="h-screen w-full p-4 md:p-6 relative">
+    <section id="top" className="h-dvh w-full p-4 md:p-6 relative">
       <div className="relative w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-black">
         <video
           autoPlay
@@ -41,34 +47,27 @@ function HeroSection() {
 
         <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20">
           <nav className="bg-black rounded-b-2xl md:rounded-b-3xl px-4 py-2 md:px-8 flex items-center gap-3 sm:gap-6 md:gap-12 lg:gap-14">
-            {["Overview", "Methodology", "Features", "Sign In"].map((item) => {
-              if (item === "Sign In") {
-                return (
-                  <Link
-                    key={item}
-                    to="/login"
-                    className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
-                    style={{ color: "rgba(225, 224, 204, 0.8)" }}
-                    onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
-                    onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
-                  >
-                    {item}
-                  </Link>
-                );
-              }
-              return (
-                <a
-                  key={item}
-                  href="#"
-                  className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
-                  style={{ color: "rgba(225, 224, 204, 0.8)" }}
-                  onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
-                  onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
-                >
-                  {item}
-                </a>
-              );
-            })}
+            {NAV_ITEMS.map(({ label, href }) => (
+              <a
+                key={label}
+                href={href}
+                className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
+                style={{ color: "rgba(225, 224, 204, 0.8)" }}
+                onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
+              >
+                {label}
+              </a>
+            ))}
+            <Link
+              to="/login"
+              className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
+              style={{ color: "rgba(225, 224, 204, 0.8)" }}
+              onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
+              onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
+            >
+              Sign In
+            </Link>
           </nav>
         </div>
 
@@ -97,7 +96,7 @@ function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Link to="/signup" className="group inline-flex items-center justify-between gap-2 bg-primary rounded-full pl-6 pr-2 py-2 text-black font-medium text-sm sm:text-base hover:gap-3 transition-all duration-300">
+                <Link to="/signup" className="group inline-flex items-center justify-between gap-2 bg-primary rounded-full pl-6 pr-2 py-2 text-black font-medium text-sm sm:text-base hover:gap-3 active:scale-[0.98] transition-all duration-300">
                   Start tracking
                   <div className="bg-black rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[#E1E0CC] group-hover:scale-110 transition-transform duration-300">
                     <ArrowRight size={18} />
@@ -125,7 +124,7 @@ function AboutSection() {
   const chars = bodyText.split("");
 
   return (
-    <section className="w-full bg-black py-24 px-4 md:px-6">
+    <section id="about" className="w-full bg-black py-24 px-4 md:px-6">
       <div className="bg-[#101010] rounded-2xl md:rounded-[2rem] p-8 md:p-16 lg:p-24 flex flex-col items-center text-center max-w-6xl mx-auto">
         <span className="text-primary text-[10px] sm:text-xs uppercase tracking-widest mb-12">
           Discipline
@@ -172,7 +171,7 @@ function AnimatedLetter({ char, progress, range }: any) {
 // ---- SECTION 3: FEATURES ----
 function FeaturesSection() {
   return (
-    <section className="w-full min-h-screen bg-black relative py-24 px-4 md:px-6 overflow-hidden">
+    <section id="features" className="w-full min-h-dvh bg-black relative py-24 px-4 md:px-6 overflow-hidden">
       <div className="absolute inset-0 bg-noise opacity-[0.15] pointer-events-none mix-blend-overlay" />
       
       <div className="relative z-10 max-w-[1400px] mx-auto">
@@ -213,11 +212,11 @@ function FeaturesSection() {
               <div>
                 <img
                   src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260405_171918_4a5edc79-d78f-4637-ac8b-53c43c220606.png&w=1280&q=85"
-                  alt="Icon"
+                  alt="Heatmap icon"
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
                 />
                 <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
-                  Visual Heatmaps. <span className="text-gray-500 text-sm">(01)</span>
+                  Visual Heatmaps.
                 </h3>
                 <ul className="space-y-4">
                   {[
@@ -233,9 +232,9 @@ function FeaturesSection() {
                   ))}
                 </ul>
               </div>
-              <a href="#" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
+              <Link to="/signup" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
                 Learn more <ArrowRight size={14} className="-rotate-45" />
-              </a>
+              </Link>
             </div>
           </FeatureCard>
 
@@ -244,11 +243,11 @@ function FeaturesSection() {
               <div>
                 <img
                   src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260405_171741_ed9845ab-f5b2-4018-8ce7-07cc01823522.png&w=1280&q=85"
-                  alt="Icon"
+                  alt="Streak icon"
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
                 />
                 <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
-                  Unbreakable Streaks. <span className="text-gray-500 text-sm">(02)</span>
+                  Unbreakable Streaks.
                 </h3>
                 <ul className="space-y-4">
                   {[
@@ -263,9 +262,9 @@ function FeaturesSection() {
                   ))}
                 </ul>
               </div>
-              <a href="#" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
+              <Link to="/signup" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
                 Learn more <ArrowRight size={14} className="-rotate-45" />
-              </a>
+              </Link>
             </div>
           </FeatureCard>
 
@@ -274,11 +273,11 @@ function FeaturesSection() {
               <div>
                 <img
                   src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260405_171809_f56666dc-c099-4778-ad82-9ad4f209567b.png&w=1280&q=85"
-                  alt="Icon"
+                  alt="Focus icon"
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover mb-8"
                 />
                 <h3 className="text-[#E1E0CC] text-xl font-medium mb-6">
-                  Deep Focus. <span className="text-gray-500 text-sm">(03)</span>
+                  Deep Focus.
                 </h3>
                 <ul className="space-y-4">
                   {[
@@ -293,9 +292,9 @@ function FeaturesSection() {
                   ))}
                 </ul>
               </div>
-              <a href="#" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
+              <Link to="/signup" className="inline-flex items-center gap-2 text-[#E1E0CC] text-sm mt-8 hover:text-primary transition-colors">
                 Learn more <ArrowRight size={14} className="-rotate-45" />
-              </a>
+              </Link>
             </div>
           </FeatureCard>
         </div>

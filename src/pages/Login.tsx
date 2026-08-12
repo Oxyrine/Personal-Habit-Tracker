@@ -40,7 +40,7 @@ export default function Login() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-black text-[#E1E0CC] flex flex-col justify-center items-center p-6 font-sans relative overflow-hidden"
+      className="min-h-dvh bg-black text-[#E1E0CC] flex flex-col justify-center items-center p-6 font-sans relative overflow-hidden"
     >
       <Link to="/" className="absolute top-8 left-8 flex items-center gap-2 text-gray-500 hover:text-[#E1E0CC] transition-colors">
         <ArrowLeft size={16} /> Back
@@ -84,7 +84,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full group flex items-center justify-between gap-2 bg-primary rounded-full pl-6 pr-2 py-2 text-black font-medium text-sm hover:gap-3 transition-all duration-300 disabled:opacity-70"
+            className="w-full group flex items-center justify-between gap-2 bg-primary rounded-full pl-6 pr-2 py-2 text-black font-medium text-sm hover:gap-3 active:scale-[0.98] transition-all duration-300 disabled:opacity-70"
           >
             {isLoading ? "Signing in..." : "Sign In"}
             <div className="bg-black rounded-full w-9 h-9 flex items-center justify-center text-[#E1E0CC] group-hover:scale-110 transition-transform duration-300">

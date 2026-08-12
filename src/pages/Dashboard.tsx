@@ -103,7 +103,7 @@ export default function Dashboard() {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-[#E1E0CC]">Loading...</div>;
+    return <div className="min-h-dvh bg-black flex items-center justify-center text-[#E1E0CC]">Loading...</div>;
   }
 
   return (
@@ -112,10 +112,10 @@ export default function Dashboard() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-black text-[#E1E0CC] font-sans flex flex-col md:flex-row"
+      className="min-h-dvh bg-black text-[#E1E0CC] font-sans flex flex-col md:flex-row"
     >
       {/* Sidebar */}
-      <aside className="w-full md:w-64 lg:w-72 border-r border-white/5 bg-[#0a0a0a] flex flex-col h-auto md:h-screen sticky top-0">
+      <aside className="w-full md:w-64 lg:w-72 border-r border-white/5 bg-[#0a0a0a] flex flex-col h-auto md:h-dvh sticky top-0">
         <div className="p-6">
           <Link to="/" className="text-2xl font-medium tracking-tight hover:text-primary transition-colors">Habits</Link>
         </div>

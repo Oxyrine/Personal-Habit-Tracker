@@ -33,7 +33,7 @@ export default function App() {
   }, []);
 
   if (isAuthenticated === null) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-[#E1E0CC]">Loading...</div>;
+    return <div className="min-h-dvh bg-black flex items-center justify-center text-[#E1E0CC]">Loading...</div>;
   }
 
   return (

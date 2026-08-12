@@ -4,14 +4,30 @@
   --color-primary: #DEDBC8;
   --font-sans: "Almarai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   --font-serif: "Instrument Serif", serif;
+
+  /* Off-black instead of pure #000, matching the #101010/#0a0a0a card tones already in use */
+  --color-black: #0a0a0a;
+  /* Warm-tinted grays so secondary text matches the cream accent instead of Tailwind's default cool blue-grays */
+  --color-gray-400: #9c9787;
+  --color-gray-500: #7c7768;
+  --color-gray-600: #57534a;
 }
 
 * {
   font-family: var(--font-sans);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   @apply bg-black text-white antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .noise-overlay {
