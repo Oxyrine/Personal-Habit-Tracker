@@ -59,10 +59,17 @@ server's 8-char rule, and a leftover "Prisma — Creative Studio" template title
 `lucide-react` for a less-common icon set, adding a footer/legal links page.
 
 A `NotFound.tsx` later appeared (added outside this assistant's session, same as
-the SPA rewrite) but was an unedited template from an unrelated project —
-"TinyTrails" branding, orange gradient, dead links, "Oops!" copy, unrelated video.
-Rewritten to match the app's actual design system and wired in as the `*`
-catch-all route in `App.tsx`.
+the SPA rewrite) but was an unedited template from a design-generation workflow —
+"TinyTrails" placeholder branding, orange/white gradient, dead `href="#"` nav links
+to pages that don't exist ("About Us", "Programs", "Reviews", "FAQ", "Contacts"),
+generic "Oops!" copy, `h-screen`. The video asset itself is legitimate — same
+`user_38xzZboKViGWJOttwIXH07lWA1P` CloudFront prefix as the Landing hero/feature
+videos, so same asset library, not a random unrelated URL.
+User explicitly wants this page's distinct orange/gradient look kept separate from
+the rest of the app's black/cream palette — **don't unify its colors to match**,
+that was asked about and declined. What got fixed instead: branding → "Habits",
+nav links → real destinations (Home/Sign In/Sign Up), copy → on-brand, `h-screen` →
+`min-h-dvh`. Wired in as the `*` catch-all route in `App.tsx`.
 
 ## Known gaps / next steps
 
