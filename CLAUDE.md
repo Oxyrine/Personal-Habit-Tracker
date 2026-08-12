@@ -29,6 +29,7 @@ here seems to contradict older assumptions, trust the code over memory.
   - `src/pages/Landing.tsx` — marketing page: hero (video bg), about, features
   - `src/pages/Login.tsx` / `Signup.tsx` — auth forms, call the JSON API directly
   - `src/pages/Dashboard.tsx` — logged-in habit list + per-habit detail view
+  - `src/pages/NotFound.tsx` — catch-all `*` route, on-brand 404
   - `src/components/Heatmap.tsx` — 365-day grid, `bg-primary` for done days
 - **DB**: SQLite locally (`habits.db`, gitignored); Postgres via Neon in production
   (`DATABASE_URL`). No code change needed to switch.
@@ -55,8 +56,13 @@ scrolls to real `#top`/`#about`/`#features` anchors, "Learn more" CTAs go to
 meaningless `alt="Icon"` text, client-side password `minLength` to match the
 server's 8-char rule, and a leftover "Prisma — Creative Studio" template title in
 `index.html`. Not fixed (out of scope / bigger risk than value): swapping
-`lucide-react` for a less-common icon set, adding a footer/legal links/404 page —
-none of those existed before either, so they're additions, not audit fixes.
+`lucide-react` for a less-common icon set, adding a footer/legal links page.
+
+A `NotFound.tsx` later appeared (added outside this assistant's session, same as
+the SPA rewrite) but was an unedited template from an unrelated project —
+"TinyTrails" branding, orange gradient, dead links, "Oops!" copy, unrelated video.
+Rewritten to match the app's actual design system and wired in as the `*`
+catch-all route in `App.tsx`.
 
 ## Known gaps / next steps
 
