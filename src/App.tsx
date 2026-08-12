@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import { useEffect, useState } from "react";
+import NotFound from "./pages/NotFound";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -15,6 +16,7 @@ function AnimatedRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
   );
