@@ -1,84 +1,80 @@
 # Habit Tracker
 
-A personal habit tracker with a GitHub-style 365-day contribution heatmap, per-habit
-streak tracking, and daily check-off — Flask + SQLAlchemy, no frontend framework.
+A personal habit tracker with a 365-day contribution heatmap, per-habit streak
+tracking, and daily check-off. React SPA frontend + Flask JSON API backend,
+cinematic dark editorial design ("Habits" hero, video backgrounds, scroll reveals).
 
 - **Live**: https://habit-tracker-six-kappa-49.vercel.app
 - **Repo**: https://github.com/Oxyrine/Personal-Habit-Tracker (branch `main`, auto-deploys via GitHub → Vercel)
 
-## Stack
+## Architecture (major change, 2026-08-10/11)
 
-- **Backend**: Flask + Flask-SQLAlchemy (`app.py`), one file, no blueprints
-- **DB**: SQLite locally (`habits.db`, auto-created on import, gitignored); Postgres via
-  Neon in production (`DATABASE_URL`, set by the Vercel Postgres/Neon integration).
-  `app.py` picks whichever is set — no code change needed to switch.
-- **Frontend**: server-rendered Jinja (`templates/`) + vanilla CSS/JS (`static/`), no
-  build step, no npm at the app level
-- **Auth**: plain email/password. `werkzeug.security` (already a Flask dependency, no
-  new package) hashes passwords. `/signup` and `/login` are separate routes; every
-  other route requires a session (`login_required`). Previously Google OAuth via
-  Authlib — dropped because Google Cloud Console setup (consent screen, credentials,
-  redirect URIs) was too much ceremony for a personal app; it also crashed production
-  once (Authlib pulled in `requests`, which wasn't in `requirements.txt`).
-- **Deploy**: Vercel's Python runtime auto-detects Flask from `requirements.txt` +
-  `api/index.py` (a thin re-export of `app.py`'s `app`). `vercel.json` is intentionally
-  empty — an explicit rewrite once broke routing; Vercel's own detection handles it.
+The app was originally server-rendered Flask/Jinja, then had a separate unwired
+`signup-ui/` React prototype. Both are gone now — `signup-ui/` was merged into the
+repo root and the whole frontend became a React SPA. **`app.py` is now a pure JSON
+API** (`/api/*` routes only, no template rendering). This rewrite happened in a
+session this assistant wasn't part of (commits `21a534c`..`2b17d47`); if something
+here seems to contradict older assumptions, trust the code over memory.
 
-## Data model (`app.py`)
+- **Backend**: Flask + Flask-SQLAlchemy (`app.py`), one file. Routes:
+  `/api/auth/status`, `/api/login`, `/api/signup`, `/api/logout`, `/api/habits`
+  (GET/POST), `/api/habits/<id>/delete`, `/api/toggle`. Auth is plain email/password
+  via `werkzeug.security` — no Google OAuth (deliberately dropped earlier, don't
+  reintroduce without being asked).
+- **Frontend**: React 19 + Vite + Tailwind v4 + `react-router-dom` v7 + `motion`
+  (motion/react) + `lucide-react`, at the repo root (`src/`, `index.html`,
+  `package.json` — note: `package.json` `name` is still `signup-ui`, a leftover from
+  before the merge, harmless but stale).
+  - `src/App.tsx` — router shell, checks `/api/auth/status` on mount
+  - `src/pages/Landing.tsx` — marketing page: hero (video bg), about, features
+  - `src/pages/Login.tsx` / `Signup.tsx` — auth forms, call the JSON API directly
+  - `src/pages/Dashboard.tsx` — logged-in habit list + per-habit detail view
+  - `src/components/Heatmap.tsx` — 365-day grid, `bg-primary` for done days
+- **DB**: SQLite locally (`habits.db`, gitignored); Postgres via Neon in production
+  (`DATABASE_URL`). No code change needed to switch.
+- **Deploy**: `vercel.json` explicitly builds both `package.json` (static Vite build
+  → `dist/`) and `api/index.py` (Python, re-exports `app.py`'s `app`), with `/api/*`
+  routed to Python and everything else to `dist/index.html`.
 
-- `User(id, email unique, password_hash, name)`
-- `Habit(id, user_id, name, created_on)`
-- `Log(id, habit_id, day)` — a row's *existence* means done that day, no boolean
-- Streaks (`compute_streaks`) count only from `created_on` forward, not from the graph's
-  365-day window start
+## Design system
 
-## Design
+Dark cinematic editorial: `#0a0a0a` background (not pure black — see below), cream
+accent `#DEDBC8` (`--color-primary`), Almarai sans + Instrument Serif italic serif
+for emphasis words, noise-texture overlays, scroll-triggered reveals via `motion`.
+Tokens in `src/index.css` `@theme`. Tailwind v4's default `black` and `gray-400/500/600`
+are overridden at the theme level (not per-class) so the whole app gets an off-black
+background and warm-tinted grays instead of Tailwind's cool blue-grays — any new
+component using `bg-black`/`text-gray-500` etc. automatically matches, no need to
+reach for arbitrary hex values.
 
-Warm-monochrome editorial style (not the earlier GitHub-dark theme): white canvas,
-Newsreader serif for hero headings, Geist Sans/Mono for UI and data, 1px-bordered cards,
-muted pastel accents, a bordered sage-green heatmap ramp (bordered so low levels stay
-legible against white — an unbordered fill made `l0` nearly invisible, see git history).
-Full palette/tokens in `static/style.css` `:root`.
+Ran a redesign-skill audit (2026-08-12) and fixed: dead `href="#"` links (nav now
+scrolls to real `#top`/`#about`/`#features` anchors, "Learn more" CTAs go to
+`/signup`), cheap `(01)/(02)/(03)` meta-labels on feature cards (removed),
+`h-screen`/`min-h-screen` → `dvh` (iOS Safari viewport-jump bug), missing
+`active:scale` press feedback on primary buttons, a global `:focus-visible` ring,
+meaningless `alt="Icon"` text, client-side password `minLength` to match the
+server's 8-char rule, and a leftover "Prisma — Creative Studio" template title in
+`index.html`. Not fixed (out of scope / bigger risk than value): swapping
+`lucide-react` for a less-common icon set, adding a footer/legal links/404 page —
+none of those existed before either, so they're additions, not audit fixes.
 
 ## Known gaps / next steps
 
-- No CSRF protection on forms (consistent with the app's existing risk posture — a
-  personal single-target app; revisit if that ever changes)
-- `signup-ui/` (see below) is a standalone design, **not wired to the Flask login flow
-  yet** — the live `/login` and `/signup` use `templates/login.html` / `signup.html`,
-  plain email/password, not the React prototype
+- No CSRF protection on forms (personal single-target app; revisit if that changes)
 - No habit rename/edit, no CSV export, no reminders, no password reset flow
-
-## Subproject: `signup-ui/`
-
-Standalone React/Vite/Tailwind v4 build of a "Sign Up" page, built to a specific visual
-spec — separate npm project, own `package.json`, own Vercel project, not part of the
-Flask app's deploy. `motion/react` for animation, `lucide-react` for icons (note: this
-lucide-react version ships **no brand icons** — the Github button uses `GitFork` as a
-stand-in; the Google option was dropped entirely, not just relabeled). Hero panel
-background is three blurred white blobs drifting on independent CSS `@keyframes` loops
-(16s/20s/24s, `prefers-reduced-motion` respected) — a free alternative to a generated
-video; the MCP media-gen connector reports the linked account as free-plan/0 credits
-(user says the account is actually Pro, so this is an auth/sync mismatch on the
-connector, not a real credits shortage — worth reconnecting the integration if a real
-video is wanted later). Hero content block sits at `pb-56` from the bottom of the panel
-(raised once already after feedback that it sat too low).
-
-- **Live**: https://signup-ui-rose.vercel.app (Vercel project `oxyrines-projects/signup-ui`,
-  connected to `Oxyrine/Personal-Habit-Tracker` `main`, root directory `signup-ui`).
-  Auto-deploys on every push to `main` — root directory alone does NOT skip builds for
-  unrelated changes elsewhere in the repo (verified: a root-only `CLAUDE.md` commit
-  still triggered a full rebuild). Actually skipped via an Ignored Build Step:
-  `git diff --quiet HEAD^ HEAD -- .` (exit 0 = skip, set in project settings, evaluated
-  from the `signup-ui/` cwd since that's the root directory).
-
-```bash
-cd signup-ui && npm run dev   # localhost:5173
-```
+- `package.json` `name` field still says `signup-ui` — cosmetic, harmless
+- Video URLs in `Landing.tsx` point to a CloudFront asset host from the earlier
+  design session — if those ever 404, the hero/feature cards need new sources
 
 ## Local dev
 
+Needs both processes running (Vite proxies `/api` to Flask on 5000):
+
 ```bash
-python app.py       # localhost:5000, SQLite, zero setup
+python app.py       # localhost:5000, SQLite, zero setup — the API
+npm run dev          # localhost:5173 — the React app
 python test_streaks.py
 ```
+
+`.claude/launch.json` (repo-parent level) has both as named configs:
+`habit-tracker` (Flask) and `habit-tracker-frontend` (Vite).
