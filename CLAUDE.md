@@ -65,10 +65,16 @@ to pages that don't exist ("About Us", "Programs", "Reviews", "FAQ", "Contacts")
 generic "Oops!" copy, `h-screen`. The video asset itself is legitimate — same
 `user_38xzZboKViGWJOttwIXH07lWA1P` CloudFront prefix as the Landing hero/feature
 videos, so same asset library, not a random unrelated URL.
-User explicitly wants this page's distinct orange/gradient look kept separate from
-the rest of the app's black/cream palette — **don't unify its colors to match**,
-that was asked about and declined. What got fixed instead: branding → "Habits",
-nav links → real destinations (Home/Sign In/Sign Up), copy → on-brand, `h-screen` →
+First pass kept the orange/gradient look distinct from the rest of the app (user
+said "just the 404 page" when asked what to revert, meaning *scope* — only that
+page, not the whole app's theme — not a statement about keeping the orange color).
+User then explicitly asked to recolor it to match: background → black (`#0a0a0a`
+via the theme override), `#F16524`/white accents → primary cream (`#DEDBC8`) and
+`#E1E0CC` text throughout nav, mobile drawer, bottom CTA — layout/copy/structure
+unchanged. Video blend mode changed `mix-blend-darken` → `mix-blend-lighten` since
+darken against black would hide the video — a required consequence of the color
+change, not scope creep. What got fixed along the way: branding → "Habits", nav
+links → real destinations (Home/Sign In/Sign Up), copy → on-brand, `h-screen` →
 `min-h-dvh`. Wired in as the `*` catch-all route in `App.tsx`.
 
 ## Known gaps / next steps
