@@ -158,17 +158,14 @@ export default function NotFound() {
       </div>
 
       {/* Center video */}
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-        style={{ marginTop: 'calc(-6vh - 40px)' }}
-      >
-        <div className="w-[120vw] h-[85vh] sm:w-[70vw] sm:h-[70vh] md:w-[62vw] md:h-[78vh]">
+      <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-6 min-h-0">
+        <div className="w-full max-w-xs sm:max-w-sm rounded-3xl overflow-hidden border border-white/5 bg-[#101010] aspect-square">
           <video
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-full object-contain pointer-events-none mix-blend-lighten"
+            className="w-full h-full object-cover pointer-events-none"
             src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_234424_b1332b69-2e69-4302-8dbc-40f86846afbd.mp4"
           />
         </div>
