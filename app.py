@@ -1,5 +1,6 @@
 import os
-from datetime import date, timedelta
+import re
+from datetime import date, datetime, timedelta
 from functools import wraps
 
 from flask import (
@@ -16,22 +17,41 @@ app = Flask(__name__)
 
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-not-secret")
 db_url = os.environ.get("DATABASE_URL")
+IS_PRODUCTION = bool(db_url)
 if db_url:
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 else:
     db_url = "sqlite:///" + os.path.join(app.root_path, "habits.db")
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
+# Secure only in production (Vercel is HTTPS-only there); local http://localhost
+# dev would silently drop the session cookie if this were always True.
+app.config["SESSION_COOKIE_SECURE"] = IS_PRODUCTION
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
 db = SQLAlchemy(app)
 
 WINDOW = 365
 MIN_PASSWORD_LEN = 8
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+LOGIN_MAX_ATTEMPTS = 5
+LOGIN_LOCKOUT_MINUTES = 15
+
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(120), nullable=False)
+    failed_attempts = db.Column(db.Integer, nullable=False, default=0)
+    locked_until = db.Column(db.DateTime, nullable=True)
 
 class Habit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -93,9 +113,21 @@ def login():
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
     user = User.query.filter_by(email=email).first()
+
+    if user and user.locked_until and user.locked_until > datetime.utcnow():
+        return jsonify({"error": "Too many failed attempts. Try again in a few minutes."}), 429
+
     if not user or not check_password_hash(user.password_hash, password):
+        if user:
+            user.failed_attempts += 1
+            if user.failed_attempts >= LOGIN_MAX_ATTEMPTS:
+                user.locked_until = datetime.utcnow() + timedelta(minutes=LOGIN_LOCKOUT_MINUTES)
+            db.session.commit()
         return jsonify({"error": "Wrong email or password"}), 400
 
+    user.failed_attempts = 0
+    user.locked_until = None
+    db.session.commit()
     session["user_id"] = user.id
     return jsonify({"success": True})
 
@@ -106,7 +138,7 @@ def signup():
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
 
-    if not name or not email or "@" not in email:
+    if not name or not email or not EMAIL_RE.match(email):
         return jsonify({"error": "Enter your name and a valid email"}), 400
     if len(password) < MIN_PASSWORD_LEN:
         return jsonify({"error": f"Password must be at least {MIN_PASSWORD_LEN} characters"}), 400
@@ -174,7 +206,11 @@ def delete_habit(habit_id):
 @login_required
 def toggle():
     data = request.get_json(silent=True) or {}
-    habit = db.session.get(Habit, data.get("habit_id"))
+    try:
+        habit_id = int(data.get("habit_id"))
+    except (TypeError, ValueError):
+        abort(400)
+    habit = db.session.get(Habit, habit_id)
     if not habit or habit.user_id != current_user().id:
         abort(404)
     try:
