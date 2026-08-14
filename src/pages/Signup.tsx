@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 
-export default function Signup() {
+export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<boolean> }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,11 +25,12 @@ export default function Signup() {
       const data = await res.json();
 
       if (data.success) {
-        window.location.href = "/dashboard";
+        await onAuthChange();
+        navigate("/dashboard");
       } else {
         setError(data.error || "Signup failed");
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred");
     } finally {
       setIsLoading(false);

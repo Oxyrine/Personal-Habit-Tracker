@@ -18,7 +18,7 @@ here seems to contradict older assumptions, trust the code over memory.
 
 - **Backend**: Flask + Flask-SQLAlchemy (`app.py`), one file. Routes:
   `/api/auth/status`, `/api/login`, `/api/signup`, `/api/logout`, `/api/habits`
-  (GET/POST), `/api/habits/<id>/delete`, `/api/toggle`. Auth is plain email/password
+  (GET/POST), `/api/habits/<id>/delete`, `/api/habits/<id>/rename`, `/api/toggle`. Auth is plain email/password
   via `werkzeug.security` — no Google OAuth (deliberately dropped earlier, don't
   reintroduce without being asked).
 - **Frontend**: React 19 + Vite + Tailwind v4 + `react-router-dom` v7 + `motion`
@@ -80,7 +80,7 @@ links → real destinations (Home/Sign In/Sign Up), copy → on-brand, `h-screen
 ## Known gaps / next steps
 
 - No CSRF protection on forms (personal single-target app; revisit if that changes)
-- No habit rename/edit, no CSV export, no reminders, no password reset flow
+- No CSV export, no reminders, no password reset flow
 - `package.json` `name` field still says `signup-ui` — cosmetic, harmless
 - Video URLs in `Landing.tsx` point to a CloudFront asset host from the earlier
   design session — if those ever 404, the hero/feature cards need new sources

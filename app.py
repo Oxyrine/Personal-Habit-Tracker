@@ -202,6 +202,20 @@ def delete_habit(habit_id):
         db.session.commit()
     return jsonify({"success": True})
 
+@app.route("/api/habits/<int:habit_id>/rename", methods=["POST"])
+@login_required
+def rename_habit(habit_id):
+    habit = db.session.get(Habit, habit_id)
+    if not habit or habit.user_id != current_user().id:
+        abort(404)
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()[:60]
+    if not name:
+        return jsonify({"error": "Name cannot be empty"}), 400
+    habit.name = name
+    db.session.commit()
+    return jsonify({"success": True, "name": name})
+
 @app.route("/api/toggle", methods=["POST"])
 @login_required
 def toggle():
