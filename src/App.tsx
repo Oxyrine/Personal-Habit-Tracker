@@ -35,9 +35,15 @@ interface AnimatedRoutesProps {
 
 function AnimatedRoutes({ isAuthenticated, user, refreshAuth }: AnimatedRoutesProps) {
   const location = useLocation();
+  // Key on the page, not the exact path: switching habits within /dashboard/:habitId
+  // must stay inside the same Dashboard instance so its own AnimatePresence can
+  // animate the transition — keying on the full path would force this whole
+  // subtree (including Dashboard's nested AnimatePresence) to unmount/remount at
+  // the same time, and two nested mode="wait" exits firing together never resolves.
+  const pageKey = location.pathname.startsWith("/dashboard") ? "/dashboard" : location.pathname;
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location} key={pageKey}>
         <Route path="/" element={<Landing />} />
         <Route
           path="/login"
