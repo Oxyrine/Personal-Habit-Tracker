@@ -1,6 +1,6 @@
-import { useRef } from "react";
-import { motion, useInView, useScroll, useTransform } from "motion/react";
-import { ArrowRight, Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useInView, useScroll, useTransform } from "motion/react";
+import { ArrowRight, ArrowUp, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePageMeta } from "../hooks/usePageMeta";
 
@@ -10,16 +10,20 @@ export default function Landing() {
     "A minimalist, focused space to build routines, track progress, and unlock your potential through daily discipline."
   );
   return (
-    <motion.main 
+    <motion.main
+      id="main-content"
+      tabIndex={-1}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, filter: "blur(10px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full bg-black min-h-dvh text-[#E1E0CC] selection:bg-[#E1E0CC]/30 selection:text-black"
+      className="w-full bg-black min-h-dvh text-[#E1E0CC] selection:bg-[#E1E0CC]/30 selection:text-black focus:outline-none"
     >
+      <SiteNav />
       <HeroSection />
       <AboutSection />
       <FeaturesSection />
+      <BackToTop />
     </motion.main>
   );
 }
@@ -29,6 +33,67 @@ const NAV_ITEMS = [
   { label: "Methodology", href: "#about" },
   { label: "Features", href: "#features" },
 ];
+
+// Sticky across the whole page, not scoped to the hero — a persistent nav
+// that stays reachable once you've scrolled past the hero into later sections.
+function SiteNav() {
+  return (
+    <div className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50">
+      <nav className="bg-black/90 backdrop-blur-sm border border-white/5 rounded-full px-4 py-2 md:px-8 flex items-center gap-3 sm:gap-6 md:gap-12 lg:gap-14">
+        {NAV_ITEMS.map(({ label, href }) => (
+          <a
+            key={label}
+            href={href}
+            className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
+            style={{ color: "rgba(225, 224, 204, 0.8)" }}
+            onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
+          >
+            {label}
+          </a>
+        ))}
+        <Link
+          to="/login"
+          className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
+          style={{ color: "rgba(225, 224, 204, 0.8)" }}
+          onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
+          onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
+        >
+          Sign In
+        </Link>
+      </nav>
+    </div>
+  );
+}
+
+function BackToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.6);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.25 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+          className="fixed bottom-6 right-4 md:right-6 z-40 w-11 h-11 rounded-full bg-primary text-black flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform duration-300"
+        >
+          <ArrowUp size={18} />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
 
 // ---- SECTION 1: HERO ----
 function HeroSection() {
@@ -49,32 +114,6 @@ function HeroSection() {
         </video>
         <div className="absolute inset-0 noise-overlay opacity-[0.7] mix-blend-overlay pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 pointer-events-none" />
-
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20">
-          <nav className="bg-black rounded-b-2xl md:rounded-b-3xl px-4 py-2 md:px-8 flex items-center gap-3 sm:gap-6 md:gap-12 lg:gap-14">
-            {NAV_ITEMS.map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
-                style={{ color: "rgba(225, 224, 204, 0.8)" }}
-                onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
-                onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
-              >
-                {label}
-              </a>
-            ))}
-            <Link
-              to="/login"
-              className="text-[10px] sm:text-xs md:text-sm transition-colors duration-300 whitespace-nowrap"
-              style={{ color: "rgba(225, 224, 204, 0.8)" }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "#E1E0CC")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "rgba(225, 224, 204, 0.8)")}
-            >
-              Sign In
-            </Link>
-          </nav>
-        </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 lg:p-16 xl:p-20 z-10 pb-8 md:pb-12">
           <div className="grid grid-cols-12 gap-6 items-end">

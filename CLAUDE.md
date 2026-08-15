@@ -173,6 +173,54 @@ Deliberately not done, each needing a decision rather than a default:
 - **Favicon set** — `favicon.svg` alone covers all evergreen browsers; only a
   nice-to-have gap is an `apple-touch-icon` PNG for iOS home-screen bookmarks.
 
+## UX-polish pass (2026-08-15)
+
+Audited a third, more app-type-dependent checklist (dark mode toggle, cookie
+banner, site search, back-to-top, mobile menus, loading animations, hover
+states, scroll progress, copy button, print stylesheet, sticky headers,
+skip-to-content, password visibility toggle, UTM tracking, form success/error
+states, confirmation modal, last-updated date, expandable FAQ, floating
+contact) and implemented the items that were cheap, objective wins for this
+app specifically:
+
+- **`src/pages/Landing.tsx`**: the nav was previously scoped inside the hero's
+  own `overflow-hidden` video container (`absolute top-0`), so it scrolled
+  away once you passed the hero. Extracted to a page-level `SiteNav` component
+  (`position: fixed`, `z-50`), now persistent across the whole scroll. Added a
+  `BackToTop` button (plain `window.scrollY` threshold + listener, no new
+  dependency) that fades in past ~60% of viewport height and smooth-scrolls
+  to `#top`.
+- **Skip-to-content link**: one `<a href="#main-content" className="sr-only
+  focus:not-sr-only ...">` in `App.tsx`, rendered once above the router so it
+  persists across every page. Each page's outer content wrapper now carries
+  `id="main-content" tabIndex={-1}` (Landing's `<main>`, Login/Signup's outer
+  `motion.div`, Dashboard's `<main>`, NotFound's outer `motion.div`) so
+  activating the link both scrolls to and focuses the right target.
+- **Password visibility toggle**: `Eye`/`EyeOff` icon button inside the
+  password field on Login and Signup, toggling `type="password"` ↔ `"text"`.
+
+Deliberately skipped, with reasoning (not a default to add):
+- **Dark mode toggle** — the app has no light theme to toggle to; it's
+  dark-only by design (the whole cinematic-editorial system is built on
+  `#0a0a0a` + cream). Adding this means designing a full second theme, not
+  wiring a switch.
+- **Site search, print stylesheet, UTM tracking, last-updated dates** — low or
+  no value here: no searchable content library, no report-style pages worth
+  printing, no marketing campaigns feeding traffic, and no static content with
+  a meaningful "freshness" concept (habit data changes live).
+- **Copy button, expandable FAQ, floating contact** — nothing in the app
+  currently needs copying (no share links/codes); an FAQ needs real Q&A
+  content the assistant shouldn't invent; floating contact needs a real
+  contact method decided first (same reasoning as the earlier real-contact-
+  address skip).
+- **Confirmation modal** — already functionally covered: habit delete uses an
+  inline "Delete forever? Yes / Cancel" row instead of a native `confirm()` or
+  a modal overlay. The function (a clear are-you-sure step) matters more than
+  it being literally a modal.
+- **Form success state** — success on Login/Signup redirects straight to the
+  dashboard; there's no distinct flash-of-success moment before that happens.
+  Considered low priority given the redirect itself is the confirmation.
+
 ## Known gaps / next steps
 
 - No CSRF protection on forms (personal single-target app; revisit if that changes)

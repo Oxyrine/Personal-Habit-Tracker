@@ -39,10 +39,12 @@ export default function NotFound() {
 
   return (
     <motion.div
+      id="main-content"
+      tabIndex={-1}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="relative w-full min-h-dvh overflow-hidden flex flex-col bg-black"
+      className="relative w-full min-h-dvh overflow-hidden flex flex-col bg-black focus:outline-none"
     >
       {/* Background 404 text mask */}
       <div

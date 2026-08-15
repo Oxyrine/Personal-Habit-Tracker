@@ -311,7 +311,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto bg-black p-6 md:p-12 lg:p-16">
+      <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto bg-black p-6 md:p-12 lg:p-16 focus:outline-none">
         <div className="max-w-4xl mx-auto">
           {error && (
             <div className="bg-red-950/30 text-red-400 p-4 rounded-xl text-sm mb-6 border border-red-900/30 flex items-center justify-between gap-4">

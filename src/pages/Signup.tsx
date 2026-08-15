@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { motion } from "motion/react";
 import { usePageMeta } from "../hooks/usePageMeta";
 
@@ -9,6 +9,7 @@ export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<b
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -40,12 +41,14 @@ export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<b
   };
 
   return (
-    <motion.div 
+    <motion.div
+      id="main-content"
+      tabIndex={-1}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="min-h-dvh bg-black text-[#E1E0CC] flex flex-col justify-center items-center p-6 font-sans relative overflow-hidden"
+      className="min-h-dvh bg-black text-[#E1E0CC] flex flex-col justify-center items-center p-6 font-sans relative overflow-hidden focus:outline-none"
     >
       <Link to="/" className="absolute top-8 left-8 flex items-center gap-2 text-gray-500 hover:text-[#E1E0CC] transition-colors">
         <ArrowLeft size={16} /> Back
@@ -87,15 +90,25 @@ export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<b
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#212121] border border-white/5 rounded-xl px-4 py-3 text-[#E1E0CC] focus:outline-none focus:border-primary/50 transition-colors"
-              placeholder="••••••••"
-              minLength={8}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#212121] border border-white/5 rounded-xl px-4 py-3 pr-11 text-[#E1E0CC] focus:outline-none focus:border-primary/50 transition-colors"
+                placeholder="••••••••"
+                minLength={8}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#E1E0CC] transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button
