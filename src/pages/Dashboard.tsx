@@ -18,11 +18,13 @@ import {
   Music,
   Languages,
   Flame,
+  LoaderCircle,
   type LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Heatmap from "../components/Heatmap";
 import type { AuthUser } from "../App";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 interface Habit {
   id: number;
@@ -80,6 +82,11 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
 
   const selectedId = habitId ? Number(habitId) : null;
   const selectedHabit = selectedId !== null ? habits.find((h) => h.id === selectedId) : undefined;
+
+  usePageMeta(
+    selectedHabit ? `${selectedHabit.name} — Habits` : "Dashboard — Habits",
+    "Track your daily habits and streaks."
+  );
 
   const loadHabits = async () => {
     try {
@@ -219,7 +226,11 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
   }, [habits, selectedId, today, navigate]);
 
   if (isLoading) {
-    return <div className="min-h-dvh bg-black flex items-center justify-center text-[#E1E0CC]">Loading...</div>;
+    return (
+      <div className="min-h-dvh bg-black flex items-center justify-center text-primary">
+        <LoaderCircle className="animate-spin" size={28} />
+      </div>
+    );
   }
 
   const doneCount = habits.filter((h) => h.done).length;

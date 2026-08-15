@@ -2,8 +2,13 @@ import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { ArrowRight, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 export default function Landing() {
+  usePageMeta(
+    "Habits — Daily discipline, visualized",
+    "A minimalist, focused space to build routines, track progress, and unlock your potential through daily discipline."
+  );
   return (
     <motion.main 
       initial={{ opacity: 0 }}

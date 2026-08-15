@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+
+Sitemap: https://habit-tracker-six-kappa-49.vercel.app/sitemap.xml

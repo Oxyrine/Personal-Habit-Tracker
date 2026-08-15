@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<boolean> }) {
+  usePageMeta("Sign Up — Habits", "Create your account and start building unbreakable routines.");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

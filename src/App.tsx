@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
+import { LoaderCircle } from "lucide-react";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -14,7 +15,9 @@ export interface AuthUser {
 }
 
 const AuthLoading = () => (
-  <div className="min-h-dvh bg-black flex items-center justify-center text-[#E1E0CC]">Loading...</div>
+  <div className="min-h-dvh bg-black flex items-center justify-center text-primary">
+    <LoaderCircle className="animate-spin" size={28} />
+  </div>
 );
 
 function RequireAuth({ isAuthenticated, children }: { isAuthenticated: boolean | null; children: ReactNode }) {

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
@@ -10,6 +11,7 @@ const NAV_LINKS = [
 ];
 
 export default function NotFound() {
+  usePageMeta("Page Not Found — Habits", "The page you're looking for doesn't exist.");
   const [menuOpen, setMenuOpen] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
   const [scaleY, setScaleY] = useState(1);

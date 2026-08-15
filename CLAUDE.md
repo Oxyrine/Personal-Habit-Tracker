@@ -134,6 +134,43 @@ worst case on a starved tab is a harmless leftover ghost fading out late, never 
 functional freeze. Prefer `popLayout` over `wait` for any AnimatePresence a user
 interacts with repeatedly.
 
+## SEO / launch-checklist pass (2026-08-15)
+
+Went through a generic 20-item site-launch checklist against the actual app. What
+was already true: custom 404 (`NotFound.tsx`), the hero CTA is above the fold
+(`h-dvh` hero), mobile breakpoints throughout, form error banners on
+Login/Signup/Dashboard, real `alt` text on the three feature icons in
+`Landing.tsx`, and the feature images are already served compressed (WebP via the
+`images.higgs.ai` proxy, `q=85`).
+
+Added:
+- `src/hooks/usePageMeta.ts` — sets `document.title` and the `<meta name="description">`
+  tag per page (Landing/Login/Signup/Dashboard/NotFound each call it; Dashboard's
+  title also reflects the selected habit). This is client-side only — there's no
+  SSR/prerendering, so it helps the browser tab and JS-rendering crawlers but not
+  unfurlers that don't execute JS (see Open Graph note below).
+- `public/robots.txt` and `public/sitemap.xml` — `/dashboard` is disallowed from
+  the sitemap and crawling since it's auth-gated and has no public content to index.
+- Real loading spinners (`lucide-react`'s `LoaderCircle` + Tailwind `animate-spin`)
+  replacing the old plain "Loading..." text in `App.tsx` and `Dashboard.tsx`.
+
+Deliberately not done, each needing a decision rather than a default:
+- **Open Graph image** — `index.html` has no `og:image`/Twitter card tags at all.
+  Needs an actual designed 1200×630 asset, not a fabricated one.
+- **Cookie banner** — not added on purpose. The app sets exactly one cookie (the
+  Flask session, strictly necessary for auth), which is exempt from consent
+  requirements under GDPR/ePrivacy. Adding a banner without real tracking would be
+  misleading. Only becomes necessary if analytics is added.
+- **Analytics** — not installed; needs a provider decision (Vercel Analytics is
+  cookieless and trivial to add given the app's already on Vercel).
+- **Privacy policy / Terms / real contact address** — not fabricated. These need
+  actual content (what's collected, business/contact info) the assistant can't
+  invent; echoes the earlier decision to skip a footer/legal page as out of scope.
+- **Sticky mobile CTA** — a real conversion-pattern decision for the landing page,
+  not a default to add silently.
+- **Favicon set** — `favicon.svg` alone covers all evergreen browsers; only a
+  nice-to-have gap is an `apple-touch-icon` PNG for iOS home-screen bookmarks.
+
 ## Known gaps / next steps
 
 - No CSRF protection on forms (personal single-target app; revisit if that changes)
