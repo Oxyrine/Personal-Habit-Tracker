@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "r
 import { AnimatePresence } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -103,6 +104,7 @@ export default function App() {
   return (
     <Router>
       <AnimatedRoutes isAuthenticated={isAuthenticated} user={user} refreshAuth={refreshAuth} />
+      <Analytics />
     </Router>
   );
 }

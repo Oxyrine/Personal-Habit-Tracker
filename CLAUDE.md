@@ -161,8 +161,10 @@ Deliberately not done, each needing a decision rather than a default:
   Flask session, strictly necessary for auth), which is exempt from consent
   requirements under GDPR/ePrivacy. Adding a banner without real tracking would be
   misleading. Only becomes necessary if analytics is added.
-- **Analytics** — not installed; needs a provider decision (Vercel Analytics is
-  cookieless and trivial to add given the app's already on Vercel).
+- ~~**Analytics**~~ — added 2026-08-15: `@vercel/analytics`, `<Analytics />` mounted
+  in `App.tsx` inside the router. Still no cookie banner needed — Vercel Web
+  Analytics is cookieless by design (page views tied to an ephemeral hashed
+  identifier, not a persistent cookie or IP-based profile).
 - **Privacy policy / Terms / real contact address** — not fabricated. These need
   actual content (what's collected, business/contact info) the assistant can't
   invent; echoes the earlier decision to skip a footer/legal page as out of scope.
