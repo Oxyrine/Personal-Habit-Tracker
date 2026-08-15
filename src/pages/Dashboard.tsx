@@ -1,6 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { LogOut, Plus, Trash2, Check, X } from "lucide-react";
+import {
+  LogOut,
+  Plus,
+  Trash2,
+  Check,
+  X,
+  BookOpen,
+  Dumbbell,
+  Footprints,
+  Brain,
+  Droplet,
+  Moon,
+  PenLine,
+  Code2,
+  Utensils,
+  Music,
+  Languages,
+  Flame,
+  type LucideIcon,
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Heatmap from "../components/Heatmap";
 import type { AuthUser } from "../App";
@@ -26,6 +45,24 @@ const formatLong = (iso: string) =>
 
 const formatShort = (iso: string) =>
   iso ? parseISO(iso).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }) : "";
+
+// No icon picker in the UI, no schema change -- just infer something sensible from
+// the name so the list isn't all identical dots. Falls back to a flame (streak).
+const ICON_RULES: [RegExp, LucideIcon][] = [
+  [/read|book|study/i, BookOpen],
+  [/exercise|gym|workout|fitness|lift|strength|yoga/i, Dumbbell],
+  [/run|jog|walk|steps|hike/i, Footprints],
+  [/meditat|mindful|breath/i, Brain],
+  [/water|hydrat|drink/i, Droplet],
+  [/sleep|rest|bed/i, Moon],
+  [/write|journal|diary/i, PenLine],
+  [/code|program|dev/i, Code2],
+  [/eat|diet|nutrition|cook|meal/i, Utensils],
+  [/music|instrument|guitar|piano|practice/i, Music],
+  [/language|learn|vocab/i, Languages],
+];
+
+const habitIcon = (name: string): LucideIcon => ICON_RULES.find(([re]) => re.test(name))?.[1] ?? Flame;
 
 export default function Dashboard({ user }: { user: AuthUser | null }) {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -216,20 +253,26 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
 
           <div className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold px-4 mb-3">Your Habits</div>
           <div className="space-y-1">
-            {habits.map((habit) => (
-              <button
-                key={habit.id}
-                onClick={() => navigate(`/dashboard/${habit.id}`)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${
-                  selectedId === habit.id ? "bg-[#1a1a1a] text-primary" : "text-gray-400 hover:bg-[#111] hover:text-[#E1E0CC]"
-                }`}
-              >
-                <span className="text-sm font-medium truncate">{habit.name}</span>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${selectedId === habit.id ? 'bg-primary/20 text-primary' : 'bg-white/5 text-gray-500'}`}>
-                  {habit.current}
-                </span>
-              </button>
-            ))}
+            {habits.map((habit) => {
+              const Icon = habitIcon(habit.name);
+              return (
+                <button
+                  key={habit.id}
+                  onClick={() => navigate(`/dashboard/${habit.id}`)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${
+                    selectedId === habit.id ? "bg-[#1a1a1a] text-primary" : "text-gray-400 hover:bg-[#111] hover:text-[#E1E0CC]"
+                  }`}
+                >
+                  <span className="flex items-center gap-2.5 min-w-0">
+                    <Icon size={15} className="shrink-0" />
+                    <span className="text-sm font-medium truncate">{habit.name}</span>
+                  </span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${selectedId === habit.id ? 'bg-primary/20 text-primary' : 'bg-white/5 text-gray-500'}`}>
+                    {habit.current}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           <form onSubmit={handleAdd} className="mt-6 px-2">
@@ -319,25 +362,29 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
                     <p className="text-gray-500 text-center py-8">No habits yet. Add one in the sidebar.</p>
                   ) : (
                     <div className="space-y-4">
-                      {habits.map((habit, i) => (
-                        <div key={habit.id} className="flex items-center justify-between p-4 rounded-2xl bg-[#1a1a1a] border border-white/5 hover:border-primary/20 transition-colors group">
-                          <div className="flex items-center gap-3 min-w-0">
-                            {i < 9 && <span className="text-[10px] text-gray-600 w-3 shrink-0">{i + 1}</span>}
-                            <span className={`text-lg font-medium transition-colors truncate ${habit.done ? 'text-gray-500 line-through' : 'text-[#E1E0CC]'}`}>
-                              {habit.name}
-                            </span>
-                            {habit.current > 0 && <span className="text-xs text-gray-500 shrink-0">{habit.current}d streak</span>}
+                      {habits.map((habit, i) => {
+                        const Icon = habitIcon(habit.name);
+                        return (
+                          <div key={habit.id} className="flex items-center justify-between p-4 rounded-2xl bg-[#1a1a1a] border border-white/5 hover:border-primary/20 transition-colors group">
+                            <div className="flex items-center gap-3 min-w-0">
+                              {i < 9 && <span className="text-[10px] text-gray-600 w-3 shrink-0">{i + 1}</span>}
+                              <Icon size={18} className={`shrink-0 ${habit.done ? 'text-gray-600' : 'text-primary/70'}`} />
+                              <span className={`text-lg font-medium transition-colors truncate ${habit.done ? 'text-gray-500 line-through' : 'text-[#E1E0CC]'}`}>
+                                {habit.name}
+                              </span>
+                              {habit.current > 0 && <span className="text-xs text-gray-500 shrink-0">{habit.current}d streak</span>}
+                            </div>
+                            <button
+                              onClick={() => handleToggle(habit.id, today)}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shrink-0 ${
+                                habit.done ? 'bg-primary text-black' : 'bg-[#2a2a2a] text-transparent hover:border-primary/50 border border-transparent'
+                              }`}
+                            >
+                              <Check size={16} />
+                            </button>
                           </div>
-                          <button
-                            onClick={() => handleToggle(habit.id, today)}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shrink-0 ${
-                              habit.done ? 'bg-primary text-black' : 'bg-[#2a2a2a] text-transparent hover:border-primary/50 border border-transparent'
-                            }`}
-                          >
-                            <Check size={16} />
-                          </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
