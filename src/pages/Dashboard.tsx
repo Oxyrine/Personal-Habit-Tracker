@@ -268,7 +268,10 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
             </div>
           )}
 
-          <AnimatePresence mode="wait">
+          {/* popLayout, not wait: an exiting view must never be able to block the
+              entering one from appearing if a frame never lands (e.g. the tab loses
+              focus mid-transition) — pop the exiting clone out of flow instead. */}
+          <AnimatePresence mode="popLayout">
             {selectedId === null ? (
               <motion.div key="overview" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
                 <div className="mb-10">

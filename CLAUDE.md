@@ -77,6 +77,63 @@ change, not scope creep. What got fixed along the way: branding → "Habits", na
 links → real destinations (Home/Sign In/Sign Up), copy → on-brand, `h-screen` →
 `min-h-dvh`. Wired in as the `*` catch-all route in `App.tsx`.
 
+## Dashboard (2026-08-14/15)
+
+Closed the gap between the cinematic landing page and the previously bare logged-in
+app. `/dashboard/:habitId?` is now a real route (`useParams`, not local state) — the
+selected habit survives refresh and the back button works. `App.tsx` actually uses
+the `isAuthenticated` it fetches now: `RequireAuth`/`RequireGuest` wrappers gate
+`/dashboard` and `/login`/`/signup` via `<Navigate>`, and `Login`/`Signup` navigate
+client-side (`onAuthChange` prop calls back into `App` to refresh auth state) instead
+of hard-reloading with `window.location.href`.
+
+- **Heatmap** (`Heatmap.tsx`) cells are clickable — `onToggleDay` backfills any past
+  day, disabled outside `[created_on, today]` since the backend 400s on those anyway.
+  Days before `created_on` render visibly dimmer than missed days (a third state, not
+  just binary done/not-done) so the grid doesn't lie about pre-habit history. Month
+  labels and a legend row were added.
+- **Overview** now shows a greeting (`user.name`, threaded through from
+  `/api/auth/status`), today's progress ("N of M complete"), and a "streaks at risk"
+  card (habits with `current > 0 && !done`) — clicking one toggles it directly.
+- **Habit rename**: new `POST /api/habits/<id>/rename` endpoint (ownership-checked
+  like `delete_habit`), inline-edit on the detail heading (click to edit, Enter
+  commits, Escape/blur cancels).
+- **Delete** uses an inline "Delete forever? Yes / Cancel" row instead of native
+  `confirm()`.
+- **Errors are visible**: add/delete/toggle/rename all check `res.ok` and surface a
+  dismissible banner (same style as the Login/Signup error banner) instead of
+  swallowing failures into `console.error`. Toggle rolls back optimistic state via
+  `loadHabits()` on failure.
+- **Keyboard shortcuts** on Overview: `1`–`9` toggle the nth habit, `N` focuses the
+  add-habit input, `Escape` returns to Overview from a detail view. Guarded against
+  firing while typing in an input.
+- Dead pre-SPA leftovers (`templates/`, `static/`) deleted — `app.py` had zero
+  `render_template` calls, nothing referenced them.
+
+**A routing/animation gotcha worth knowing**: the outer page-transition
+`<AnimatePresence mode="wait"><Routes key={location.pathname}>` in `App.tsx`
+originally keyed on the *full* pathname. Navigating within `/dashboard/:habitId?`
+(e.g. clicking a different habit) shares that one Route, but keying on the full path
+still forced the whole Dashboard subtree — including its *own* nested
+`AnimatePresence` for the Overview↔Detail transition — to unmount and remount
+mid-navigation. Two nested `mode="wait"` exits resolving at once does not complete
+reliably: the URL updates but the page can stay frozen on the old view. Fixed by
+keying the outer transition on *which page* (`/dashboard` vs the literal pathname
+for everything else), not the exact path, so switching habits stays inside the same
+Dashboard instance.
+
+A related, more fundamental fix: Dashboard's own inner Overview↔Detail
+`AnimatePresence` was switched from `mode="wait"` to `mode="popLayout"`. `mode="wait"`
+makes the *entering* view's mount strictly depend on the *exiting* view's animation
+finishing — if the tab loses visibility/focus mid-transition (verified in this repo's
+test tooling via `document.hidden`), `requestAnimationFrame` can stall indefinitely
+and that exit-complete signal never fires, freezing the UI on stale content
+permanently, not just briefly. `popLayout` pops the exiting element out of layout
+flow instead of gating on it, so the correct new view always renders immediately;
+worst case on a starved tab is a harmless leftover ghost fading out late, never a
+functional freeze. Prefer `popLayout` over `wait` for any AnimatePresence a user
+interacts with repeatedly.
+
 ## Known gaps / next steps
 
 - No CSRF protection on forms (personal single-target app; revisit if that changes)
