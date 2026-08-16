@@ -15,9 +15,17 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-not-secret")
 db_url = os.environ.get("DATABASE_URL")
 IS_PRODUCTION = bool(db_url)
+
+# Fail loudly if SECRET_KEY is missing in production rather than silently signing
+# sessions with a fallback that's sitting in this public repo -- a misconfigured
+# deploy should 500, not quietly become forgeable by anyone who reads the source.
+if IS_PRODUCTION:
+    app.secret_key = os.environ["SECRET_KEY"]
+else:
+    app.secret_key = os.environ.get("SECRET_KEY", "dev-only-not-secret")
+
 if db_url:
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 else:
