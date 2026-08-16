@@ -221,13 +221,91 @@ Deliberately skipped, with reasoning (not a default to add):
   dashboard; there's no distinct flash-of-success moment before that happens.
   Considered low priority given the redirect itself is the confirmation.
 
+## Independent security review (2026-08-16)
+
+Ran an orchestrated review — an independent security-auditor subagent audit,
+then a separate code-reviewer subagent critiquing those findings before
+anything was fixed. The second pass caught real errors in the first (HSTS is
+already set platform-wide by Vercel; Flask already caps session age at 31
+days by default regardless of the `permanent` flag; truncating `Habit.logs`
+to a display window would have corrupted `longest`/`total` stats, not fixed
+anything) — worth remembering that a single audit pass shouldn't be trusted
+blind, and that "independent" only works if the second reviewer actually goes
+back to the source rather than trusting the first report's line numbers.
+
+**Found and fixed, in order of severity:**
+- **Critical — forgeable session cookies.** `SECRET_KEY` was never set in
+  Vercel production, so Flask silently signed sessions with the hardcoded
+  fallback string committed in this public repo. Anyone who read the source
+  could forge a cookie for any `user_id` and take over any account with zero
+  credentials — verified exploitable, not theoretical. Fixed: real
+  `SECRET_KEY` set in Vercel prod (Sensitive), and `app.py` now raises
+  (`os.environ["SECRET_KEY"]`, no `.get()` fallback) rather than silently
+  reopening the hole if the var is ever missing again. This also rotated
+  every existing session, including anything already forged.
+- **High — login lockout never recovered.** `failed_attempts` only reset on
+  a *successful* login, so once locked, a single wrong password after the
+  15-minute window re-locked the account instantly, forever (no password
+  reset flow exists). Fixed: the counter now also resets once `locked_until`
+  has passed.
+- **Low, but the cheapest real fix — unguarded `current_user()`.** Five
+  routes dereferenced it without a null check, so a session outliving its
+  user row (deleted mid-session) caused a 500. Fixed at the one chokepoint —
+  `login_required` now clears the session and 401s if the row is gone.
+- **Signup gated behind an invite code.** This is confirmed personal/
+  single-user, not a public product — despite the landing page's open
+  "Start tracking" CTA, which now leads to a closed form for anyone without
+  the code. `SIGNUP_INVITE_CODE` lives in Vercel prod; checked first in
+  `signup()`, before the email-exists lookup, so a stranger without it never
+  reaches that oracle or burns a scrypt hash. This also closed the
+  unauthenticated-signup DoS surface and the habit-flooding vector in the
+  same change — decide-not-to-be-public turned out to make three separate
+  findings moot at once.
+- **Session lifetime tightened.** `PERMANENT_SESSION_LIFETIME` set to 7 days
+  (was implicitly 31, Flask's default).
+- **CSP added as `Content-Security-Policy-Report-Only`**, not enforced —
+  verified zero violations across every page (Landing incl. video/images,
+  Login, Signup, Dashboard overview + detail/heatmap, 404) before it was even
+  considered safe to keep. Sources are scoped to exactly what's actually used
+  (`fonts.googleapis.com`, `fonts.gstatic.com`, the CloudFront video host,
+  the `images.higgs.ai` proxy) plus `'unsafe-inline'` on `style-src` since
+  `motion` writes inline style attributes on every animated element. Promote
+  to enforcing (`Content-Security-Policy`) once you're comfortable it'll stay
+  clean as pages change.
+
+**Reviewed and deliberately left as-is, with reasoning:**
+- Login timing side-channel (~100x gap between existing/nonexistent email) —
+  real, but the signup gate above already closes the louder, noise-free
+  version of the same oracle (`"account already exists"`). Revisit only if
+  signup ever opens back up.
+- Rate limiting beyond the login lockout — the honest fix on Vercel's
+  serverless model needs Redis/Upstash (in-memory counters reset every cold
+  start). Disproportionate for a personal app; the signup gate removes the
+  main abuse surface anyway.
+- `Habit.logs`'s `lazy="selectin"` loading full history, not just the
+  display window — leave alone. `total` and `longest` streak are computed
+  over the *entire* history, not just the 365-day window; truncating the
+  query would silently corrupt those numbers for an imperceptible speedup.
+- CSRF tokens — `SESSION_COOKIE_SAMESITE=Lax` already fully mitigates this
+  given every mutating route is POST-only; no state-changing GET routes
+  exist. Revisit if that changes.
+- Static-asset security headers (`{handle: "filesystem"}` bypasses the
+  header rules for `/assets/*.js`) — cosmetic; nosniff/X-Frame-Options on a
+  JS file that's already correctly typed and unframeable protects nothing.
+- Delete/rename response-code inconsistency (delete silently 200s on another
+  user's habit instead of 404ing like rename does) — real inconsistency,
+  zero actual privacy impact since rename already leaks existence via 404.
+  Cosmetic, not security.
+
 ## Known gaps / next steps
 
-- No CSRF protection on forms (personal single-target app; revisit if that changes)
 - No CSV export, no reminders, no password reset flow
 - `package.json` `name` field still says `signup-ui` — cosmetic, harmless
 - Video URLs in `Landing.tsx` point to a CloudFront asset host from the earlier
   design session — if those ever 404, the hero/feature cards need new sources
+- Landing page's public "Start tracking"/"Sign Up" CTAs now lead to a signup
+  form that rejects anyone without `SIGNUP_INVITE_CODE` — accepted consequence
+  of confirming this is a personal app, not a copy/messaging fix
 
 ## Local dev
 
