@@ -9,6 +9,7 @@ export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<b
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [invite, setInvite] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +24,7 @@ export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<b
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, invite }),
       });
       const data = await res.json();
 
@@ -109,6 +110,17 @@ export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<b
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Invite Code</label>
+            <input
+              type="text"
+              required
+              value={invite}
+              onChange={(e) => setInvite(e.target.value)}
+              className="w-full bg-[#212121] border border-white/5 rounded-xl px-4 py-3 text-[#E1E0CC] focus:outline-none focus:border-primary/50 transition-colors"
+              placeholder="Required to create an account"
+            />
           </div>
 
           <button

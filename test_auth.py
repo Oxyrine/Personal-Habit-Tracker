@@ -1,3 +1,6 @@
+import os
+from datetime import datetime, timedelta
+
 import app as app_module
 
 app_module.app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
@@ -82,6 +85,53 @@ def test_rename_updates_owners_habit():
     assert r.get_json()["name"] == "Renamed"
 
 
+def test_signup_rejects_without_invite_code():
+    c = fresh_client()
+    os.environ["SIGNUP_INVITE_CODE"] = "letmein"
+    try:
+        r = c.post("/api/signup", json={"name": "A", "email": "a@example.com", "password": "correcthorse"})
+        assert r.status_code == 403
+
+        r = c.post("/api/signup", json={"name": "A", "email": "a@example.com", "password": "correcthorse", "invite": "wrong"})
+        assert r.status_code == 403
+
+        r = c.post("/api/signup", json={"name": "A", "email": "a@example.com", "password": "correcthorse", "invite": "letmein"})
+        assert r.status_code == 200
+    finally:
+        del os.environ["SIGNUP_INVITE_CODE"]
+
+
+def test_login_unlocks_after_expiry_instead_of_relocking():
+    c = fresh_client()
+    c.post("/api/signup", json={"name": "A", "email": "a@example.com", "password": "correcthorse"})
+    c.post("/api/logout")
+
+    with app_module.app.app_context():
+        user = app_module.User.query.filter_by(email="a@example.com").first()
+        user.failed_attempts = app_module.LOGIN_MAX_ATTEMPTS
+        user.locked_until = datetime.utcnow() - timedelta(seconds=1)  # expired
+        app_module.db.session.commit()
+
+    # One wrong attempt after expiry should reset the counter, not re-lock on the spot.
+    r = c.post("/api/login", json={"email": "a@example.com", "password": "wrong"})
+    assert r.status_code == 400
+
+    r = c.post("/api/login", json={"email": "a@example.com", "password": "correcthorse"})
+    assert r.status_code == 200
+
+
+def test_login_required_clears_session_for_deleted_user():
+    c = fresh_client()
+    c.post("/api/signup", json={"name": "A", "email": "a@example.com", "password": "correcthorse"})
+
+    with app_module.app.app_context():
+        app_module.User.query.filter_by(email="a@example.com").delete()
+        app_module.db.session.commit()
+
+    r = c.get("/api/habits")
+    assert r.status_code == 401
+
+
 if __name__ == "__main__":
     test_signup_rejects_bad_email()
     test_signup_accepts_valid_email()
@@ -89,4 +139,7 @@ if __name__ == "__main__":
     test_login_success_resets_failed_attempts()
     test_rename_rejects_other_users_habit()
     test_rename_updates_owners_habit()
+    test_signup_rejects_without_invite_code()
+    test_login_unlocks_after_expiry_instead_of_relocking()
+    test_login_required_clears_session_for_deleted_user()
     print("ok")

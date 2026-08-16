@@ -37,6 +37,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SESSION_COOKIE_SECURE"] = IS_PRODUCTION
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 
 db = SQLAlchemy(app)
 
@@ -100,7 +101,8 @@ def current_user():
 def login_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
-        if "user_id" not in session:
+        if "user_id" not in session or current_user() is None:
+            session.clear()
             return jsonify({"error": "Unauthorized"}), 401
         return view(*args, **kwargs)
     return wrapped
@@ -122,8 +124,11 @@ def login():
     password = data.get("password") or ""
     user = User.query.filter_by(email=email).first()
 
-    if user and user.locked_until and user.locked_until > datetime.utcnow():
-        return jsonify({"error": "Too many failed attempts. Try again in a few minutes."}), 429
+    if user and user.locked_until:
+        if user.locked_until > datetime.utcnow():
+            return jsonify({"error": "Too many failed attempts. Try again in a few minutes."}), 429
+        user.failed_attempts = 0
+        user.locked_until = None
 
     if not user or not check_password_hash(user.password_hash, password):
         if user:
@@ -142,6 +147,14 @@ def login():
 @app.route("/api/signup", methods=["POST"])
 def signup():
     data = request.get_json(silent=True) or {}
+
+    # Personal single-user app: closed unless SIGNUP_INVITE_CODE is unset (local dev).
+    # Checked first so a stranger without the code never reaches the email-exists
+    # oracle below, and never burns a scrypt hash.
+    invite = os.environ.get("SIGNUP_INVITE_CODE")
+    if invite and data.get("invite") != invite:
+        return jsonify({"error": "Signups are closed"}), 403
+
     name = (data.get("name") or "").strip()[:120]
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
