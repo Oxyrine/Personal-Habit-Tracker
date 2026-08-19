@@ -81,19 +81,35 @@ with app.app_context():
 def compute_streaks(days, created_on, today):
     days = {d for d in days if d >= created_on}
     if not days:
-        return 0, 0
-    longest = run = 0
-    prev = None
-    for d in sorted(days):
-        run = run + 1 if prev and (d - prev).days == 1 else 1
-        longest = max(longest, run)
-        prev = d
-    cursor = today if today in days else today - timedelta(days=1)
+        return 0, 0, 0
+        
+    longest = 0
     current = 0
-    while cursor in days:
-        current += 1
-        cursor -= timedelta(days=1)
-    return current, longest
+    freezes = 0
+    actual_done_in_current_streak = 0
+    
+    cursor = created_on
+    while cursor <= today:
+        if cursor in days:
+            current += 1
+            actual_done_in_current_streak += 1
+            if actual_done_in_current_streak % 7 == 0:
+                freezes += 1
+            longest = max(longest, current)
+        else:
+            if cursor == today:
+                pass
+            elif freezes > 0:
+                freezes -= 1
+                current += 1
+                longest = max(longest, current)
+            else:
+                current = 0
+                actual_done_in_current_streak = 0
+                freezes = 0
+        cursor += timedelta(days=1)
+        
+    return current, longest, freezes
 
 def current_user():
     return db.session.get(User, session["user_id"])
@@ -189,7 +205,7 @@ def get_habits():
     rows = []
     for h in habits:
         days = {log.day for log in h.logs}
-        current, longest = compute_streaks(days, h.created_on, today)
+        current, longest, freezes = compute_streaks(days, h.created_on, today)
         rows.append(
             {
                 "id": h.id,
@@ -198,6 +214,7 @@ def get_habits():
                 "done": today in days,
                 "current": current,
                 "longest": longest,
+                "freezes": freezes,
                 "total": sum(1 for d in days if d >= h.created_on),
                 "days": sorted(d.isoformat() for d in days if d >= start),
             }
@@ -264,13 +281,14 @@ def toggle():
     db.session.commit()
 
     days = {l.day for l in habit.logs}
-    current, longest = compute_streaks(days, habit.created_on, today)
+    current, longest, freezes = compute_streaks(days, habit.created_on, today)
     return jsonify(
         habit_id=habit.id,
         day=day.isoformat(),
         done=day in days,
         current=current,
         longest=longest,
+        freezes=freezes,
         total=sum(1 for d in days if d >= habit.created_on),
     )
 

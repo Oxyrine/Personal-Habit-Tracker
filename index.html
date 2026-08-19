@@ -7,12 +7,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
-    <title>Habits — Daily discipline, visualized</title>
-    <meta name="description" content="A minimalist, focused space to build routines, track progress, and unlock your potential through daily discipline." />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <title>Deep Work Ledger — Discipline, visualized</title>
+    <meta name="description" content="A cinematic ledger for creatives, writers, and developers to track flow-state sessions and creative output." />
 
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
   </body>
 </html>

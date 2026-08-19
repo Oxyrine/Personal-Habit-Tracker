@@ -119,8 +119,8 @@ function HeroSection() {
           <div className="grid grid-cols-12 gap-6 items-end">
             <div className="col-span-12 md:col-span-8">
               <WordsPullUp
-                text="Habits"
-                className="text-[26vw] sm:text-[24vw] md:text-[22vw] lg:text-[20vw] xl:text-[19vw] 2xl:text-[20vw] font-medium leading-[0.85] tracking-[-0.07em] text-[#E1E0CC]"
+                text="Deep Work Ledger"
+                className="text-[20vw] sm:text-[18vw] md:text-[16vw] lg:text-[14vw] xl:text-[12vw] 2xl:text-[14vw] font-medium leading-[0.85] tracking-[-0.07em] text-[#E1E0CC]"
                 showAsterisk
               />
             </div>
@@ -131,8 +131,8 @@ function HeroSection() {
                 transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="text-primary/70 text-xs sm:text-sm md:text-base leading-[1.2]"
               >
-                A minimalist, focused space to build routines, track progress, and unlock your 
-                potential through daily discipline. No distractions, just consistency.
+                A cinematic ledger for creatives, writers, and developers to track 
+                flow-state sessions and creative output. No distractions, just deep work.
               </motion.p>
               
               <motion.div

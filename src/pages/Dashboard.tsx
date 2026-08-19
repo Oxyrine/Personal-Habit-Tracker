@@ -33,6 +33,7 @@ interface Habit {
   done: boolean;
   current: number;
   longest: number;
+  freezes: number;
   total: number;
   days: string[];
 }
@@ -460,10 +461,14 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
                   <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
                     <span className="text-4xl font-medium text-primary mb-1">{selectedHabit.current}</span>
                     <span className="text-xs text-gray-500 uppercase tracking-widest">Current Streak</span>
+                  </div>
+                  <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-4xl font-medium text-primary mb-1">{selectedHabit.freezes}</span>
+                    <span className="text-xs text-gray-500 uppercase tracking-widest">Rest Days</span>
                   </div>
                   <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
                     <span className="text-4xl font-medium text-[#E1E0CC] mb-1">{selectedHabit.longest}</span>

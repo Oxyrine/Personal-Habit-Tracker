@@ -25,7 +25,7 @@ export default function Heatmap({ days, today, createdOn, onToggleDay }: Heatmap
 
   const endDate = parseDate(today);
   const startDate = parseDate(today);
-  startDate.setDate(endDate.getDate() - 364); // 365 days total
+  startDate.setDate(endDate.getDate() - 29); // 30 days total
   const createdDate = parseDate(createdOn);
 
   const dateArray = [];
