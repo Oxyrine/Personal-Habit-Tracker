@@ -1,8 +1,29 @@
-# Habit Tracker
+# Deep Work Ledger
 
-A personal habit tracker with a 365-day contribution heatmap, per-habit streak
-tracking, and daily check-off. React SPA frontend + Flask JSON API backend,
-cinematic dark editorial design ("Habits" hero, video backgrounds, scroll reveals).
+A personal habit tracker, rebranded 2026-08-19/20 as "Deep Work Ledger" — a
+cinematic ledger for tracking flow-state sessions and creative output rather
+than generic daily habits. React SPA frontend + Flask JSON API backend, same
+dark editorial design (video backgrounds, scroll reveals) with the hero/copy
+now reading "Deep Work Ledger" instead of "Habits".
+
+The rebrand is copy/branding only — the underlying data model, routes
+(`/api/habits`), and internal identifiers (`Habit`, `habitId`, `loadHabits`,
+etc.) are unchanged and still say "habit"; only user-visible text was
+touched. Nav/sidebar logo and 404 page brand text read "Ledger" (short form,
+matches `manifest.json`'s `short_name`); full-length titles read "Deep Work
+Ledger". The Landing page's feature-list and about-section copy was reworded
+to "sessions"/"deep work" language to match; Dashboard's sidebar/placeholder/
+error copy was reworded from "habit" to "session" for the same reason.
+
+The pivot commit (`51df97e`, not part of a session this assistant was
+directly involved in) also added a `freezes` field — every 7 logged days
+banks one "streak freeze" (shown as "Rest Days") that can silently cover one
+missed day before a streak resets — and shrank the heatmap window from 365
+days to 30 (`Heatmap.tsx`'s `startDate` offset). The `WINDOW = 365` constant
+in `app.py` that bounds what data is *sent* to the frontend was **not**
+updated to match — harmless today since the frontend only renders the last
+30 days it's given regardless of how many arrive, but worth knowing if that
+constant is ever read for anything else.
 
 - **Live**: https://habit-tracker-six-kappa-49.vercel.app
 - **Repo**: https://github.com/Oxyrine/Personal-Habit-Tracker (branch `main`, auto-deploys via GitHub → Vercel)

@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { usePageMeta } from "../hooks/usePageMeta";
 
 export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<boolean> }) {
-  usePageMeta("Sign Up — Habits", "Create your account and start building unbreakable routines.");
+  usePageMeta("Sign Up — Deep Work Ledger", "Create your account and start your ledger.");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,7 +62,7 @@ export default function Signup({ onAuthChange }: { onAuthChange: () => Promise<b
         className="w-full max-w-md bg-[#101010] p-10 rounded-[2rem] shadow-2xl border border-white/5"
       >
         <h2 className="text-3xl md:text-4xl font-medium mb-2 tracking-tight">Create Account</h2>
-        <p className="text-gray-500 text-sm mb-8">Start building unbreakable routines.</p>
+        <p className="text-gray-500 text-sm mb-8">Start your ledger.</p>
 
         {error && <div className="bg-red-950/30 text-red-400 p-4 rounded-xl text-sm mb-6 border border-red-900/30">{error}</div>}
 

@@ -11,7 +11,7 @@ const NAV_LINKS = [
 ];
 
 export default function NotFound() {
-  usePageMeta("Page Not Found — Habits", "The page you're looking for doesn't exist.");
+  usePageMeta("Page Not Found — Deep Work Ledger", "The page you're looking for doesn't exist.");
   const [menuOpen, setMenuOpen] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
   const [scaleY, setScaleY] = useState(1);
@@ -75,7 +75,7 @@ export default function NotFound() {
               <div key={i} className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-primary rounded-full" />
             ))}
           </div>
-          <span className="text-[#E1E0CC] font-bold text-lg sm:text-xl ml-2 tracking-tight">Habits</span>
+          <span className="text-[#E1E0CC] font-bold text-lg sm:text-xl ml-2 tracking-tight">Ledger</span>
         </Link>
 
         <div className="hidden md:flex gap-1 absolute left-1/2 -translate-x-1/2">
@@ -118,7 +118,7 @@ export default function NotFound() {
                     <div key={i} className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-primary rounded-full" />
                   ))}
                 </div>
-                <span className="text-[#E1E0CC] font-bold text-lg sm:text-xl ml-2 tracking-tight">Habits</span>
+                <span className="text-[#E1E0CC] font-bold text-lg sm:text-xl ml-2 tracking-tight">Ledger</span>
               </div>
               <button
                 onClick={() => setMenuOpen(false)}
@@ -154,7 +154,7 @@ export default function NotFound() {
                 style={{ transitionDelay: menuOpen ? '450ms' : '0ms' }}
               >
                 <ArrowLeft className="w-5 h-5" />
-                Back to Habits
+                Back to Ledger
               </Link>
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function NotFound() {
           className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-full text-black bg-primary font-semibold text-sm sm:text-base hover:scale-105 active:scale-100 hover:shadow-lg transition-all"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-          Back to Habits
+          Back to Ledger
         </Link>
       </div>
     </motion.div>

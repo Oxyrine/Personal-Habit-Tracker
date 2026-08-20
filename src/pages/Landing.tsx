@@ -6,8 +6,8 @@ import { usePageMeta } from "../hooks/usePageMeta";
 
 export default function Landing() {
   usePageMeta(
-    "Habits — Daily discipline, visualized",
-    "A minimalist, focused space to build routines, track progress, and unlock your potential through daily discipline."
+    "Deep Work Ledger — Discipline, visualized",
+    "A cinematic ledger for creatives, writers, and developers to track flow-state sessions and creative output."
   );
   return (
     <motion.main
@@ -164,7 +164,7 @@ function AboutSection() {
   });
 
   const bodyText =
-    "Over the last few years, we realized that the key to achieving any goal isn't motivation—it's building an unbreakable routine. We built this tracker to give you a clear, distraction-free environment to monitor your daily habits and visualize your long-term progress.";
+    "Over the last few years, we realized that the key to great work isn't motivation—it's showing up for the session. We built this ledger to give you a clear, distraction-free environment to log your deep work and visualize your long-term output.";
   const chars = bodyText.split("");
 
   return (
@@ -265,7 +265,7 @@ function FeaturesSection() {
                 <ul className="space-y-4">
                   {[
                     "Track daily completions",
-                    "Visualize 365-day progress",
+                    "Visualize 30-day progress",
                     "Identify success patterns",
                     "Maintain your streaks"
                   ].map((item, i) => (

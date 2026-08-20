@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { usePageMeta } from "../hooks/usePageMeta";
 
 export default function Login({ onAuthChange }: { onAuthChange: () => Promise<boolean> }) {
-  usePageMeta("Sign In — Habits", "Sign in to continue tracking your habits.");
+  usePageMeta("Sign In — Deep Work Ledger", "Sign in to continue logging your sessions.");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

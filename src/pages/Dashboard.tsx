@@ -85,8 +85,8 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
   const selectedHabit = selectedId !== null ? habits.find((h) => h.id === selectedId) : undefined;
 
   usePageMeta(
-    selectedHabit ? `${selectedHabit.name} — Habits` : "Dashboard — Habits",
-    "Track your daily habits and streaks."
+    selectedHabit ? `${selectedHabit.name} — Deep Work Ledger` : "Dashboard — Deep Work Ledger",
+    "Track your daily sessions and streaks."
   );
 
   const loadHabits = async () => {
@@ -101,7 +101,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
       setHabits(data.habits || []);
       setToday(data.today || "");
     } catch {
-      setError("Couldn't load your habits. Try refreshing.");
+      setError("Couldn't load your sessions. Try refreshing.");
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +159,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
       setNewHabitName("");
       loadHabits();
     } catch {
-      setError("Couldn't add that habit. Try again.");
+      setError("Couldn't add that session. Try again.");
     }
   };
 
@@ -171,7 +171,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
       if (selectedId === id) navigate("/dashboard");
       loadHabits();
     } catch {
-      setError("Couldn't delete that habit. Try again.");
+      setError("Couldn't delete that session. Try again.");
       setConfirmingDeleteId(null);
     }
   };
@@ -191,7 +191,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
       });
       if (!res.ok) throw new Error("Rename failed");
     } catch {
-      setError("Couldn't rename that habit. Try again.");
+      setError("Couldn't rename that session. Try again.");
       loadHabits();
     }
   };
@@ -248,7 +248,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
       {/* Sidebar */}
       <aside className="w-full md:w-64 lg:w-72 border-r border-white/5 bg-[#0a0a0a] flex flex-col h-auto md:h-dvh sticky top-0">
         <div className="p-6">
-          <Link to="/" className="text-2xl font-medium tracking-tight hover:text-primary transition-colors">Habits</Link>
+          <Link to="/" className="text-2xl font-medium tracking-tight hover:text-primary transition-colors">Ledger</Link>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -263,7 +263,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
             </button>
           </div>
 
-          <div className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold px-4 mb-3">Your Habits</div>
+          <div className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold px-4 mb-3">Your Sessions</div>
           <div className="space-y-1">
             {habits.map((habit) => {
               const Icon = habitIcon(habit.name);
@@ -294,7 +294,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
                 type="text"
                 value={newHabitName}
                 onChange={(e) => setNewHabitName(e.target.value)}
-                placeholder="New habit..."
+                placeholder="New session..."
                 className="w-full bg-[#111] border border-white/5 rounded-xl pl-4 pr-10 py-2.5 text-sm text-[#E1E0CC] focus:outline-none focus:border-primary/50 transition-colors"
                 maxLength={60}
               />
@@ -371,7 +371,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
 
                 <div className="bg-[#101010] border border-white/5 rounded-3xl p-6 md:p-10 shadow-2xl">
                   {habits.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">No habits yet. Add one in the sidebar.</p>
+                    <p className="text-gray-500 text-center py-8">No sessions yet. Add one in the sidebar.</p>
                   ) : (
                     <div className="space-y-4">
                       {habits.map((habit, i) => {
@@ -403,7 +403,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
 
                 {habits.length > 0 && (
                   <p className="text-xs text-gray-600 mt-4">
-                    Press <kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">1</kbd>–<kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">9</kbd> to check off a habit, <kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">N</kbd> to add one
+                    Press <kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">1</kbd>–<kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">9</kbd> to log a session, <kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">N</kbd> to add one
                   </p>
                 )}
               </motion.div>
