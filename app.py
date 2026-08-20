@@ -31,6 +31,10 @@ if db_url:
 else:
     db_url = "sqlite:///" + os.path.join(app.root_path, "habits.db")
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+# Neon (and most serverless Postgres) autosuspends on idle; without pre_ping,
+# SQLAlchemy reuses a pooled connection that's already dead and the first
+# query after a suspend 500s instead of reconnecting.
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 
 # Secure only in production (Vercel is HTTPS-only there); local http://localhost
 # dev would silently drop the session cookie if this were always True.
