@@ -298,9 +298,9 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
                 className="w-full bg-[#111] border border-white/5 rounded-xl pl-4 pr-10 py-2.5 text-sm text-[#E1E0CC] focus:outline-none focus:border-primary/50 transition-colors"
                 maxLength={60}
               />
-              <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors">
+              <motion.button type="submit" whileTap={{ scale: 0.85 }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors">
                 <Plus size={18} />
-              </button>
+              </motion.button>
             </div>
           </form>
         </div>
@@ -357,13 +357,14 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
                     <p className="text-sm text-red-400 font-medium mb-3">Streaks at risk today</p>
                     <div className="flex flex-wrap gap-2">
                       {atRisk.map((h) => (
-                        <button
+                        <motion.button
                           key={h.id}
                           onClick={() => handleToggle(h.id, today)}
+                          whileTap={{ scale: 0.95 }}
                           className="text-sm bg-red-950/20 hover:bg-red-950/30 text-red-300 px-3 py-1.5 rounded-full border border-red-900/30 transition-colors"
                         >
                           {h.name} · {h.current} day{h.current === 1 ? "" : "s"}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   </div>
@@ -386,14 +387,15 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
                               </span>
                               {habit.current > 0 && <span className="text-xs text-gray-500 shrink-0">{habit.current}d streak</span>}
                             </div>
-                            <button
+                            <motion.button
                               onClick={() => handleToggle(habit.id, today)}
+                              whileTap={{ scale: 0.85 }}
                               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shrink-0 ${
                                 habit.done ? 'bg-primary text-black' : 'bg-[#2a2a2a] text-transparent hover:border-primary/50 border border-transparent'
                               }`}
                             >
                               <Check size={16} />
-                            </button>
+                            </motion.button>
                           </div>
                         );
                       })}
@@ -438,26 +440,29 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
                   {confirmingDeleteId === selectedHabit.id ? (
                     <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                       <span className="text-sm text-gray-500 whitespace-nowrap">Delete forever?</span>
-                      <button
+                      <motion.button
                         onClick={() => handleDelete(selectedHabit.id)}
+                        whileTap={{ scale: 0.96 }}
                         className="text-sm text-red-400 hover:text-red-300 bg-red-950/20 px-4 py-2 rounded-full transition-colors border border-red-900/30 whitespace-nowrap"
                       >
                         Yes, delete
-                      </button>
-                      <button
+                      </motion.button>
+                      <motion.button
                         onClick={() => setConfirmingDeleteId(null)}
+                        whileTap={{ scale: 0.96 }}
                         className="text-sm text-gray-400 hover:text-[#E1E0CC] px-4 py-2 rounded-full transition-colors border border-white/10 whitespace-nowrap"
                       >
                         Cancel
-                      </button>
+                      </motion.button>
                     </div>
                   ) : (
-                    <button
+                    <motion.button
                       onClick={() => setConfirmingDeleteId(selectedHabit.id)}
+                      whileTap={{ scale: 0.96 }}
                       className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 bg-red-950/20 px-4 py-2 rounded-full transition-colors self-start sm:self-auto border border-red-900/30 shrink-0"
                     >
                       <Trash2 size={16} /> Delete
-                    </button>
+                    </motion.button>
                   )}
                 </div>
 
@@ -482,14 +487,15 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
 
                 <div className="bg-[#101010] p-6 rounded-3xl border border-white/5 flex items-center justify-between mb-8">
                   <span className="text-[#E1E0CC] font-medium">Done today?</span>
-                  <button
+                  <motion.button
                     onClick={() => handleToggle(selectedHabit.id, today)}
+                    whileTap={{ scale: 0.88 }}
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                       selectedHabit.done ? 'bg-primary text-black' : 'bg-[#2a2a2a] text-transparent hover:border-primary/50 border border-transparent'
                     }`}
                   >
                     <Check size={20} />
-                  </button>
+                  </motion.button>
                 </div>
 
                 <div className="bg-[#101010] p-6 md:p-8 rounded-3xl border border-white/5 overflow-hidden">

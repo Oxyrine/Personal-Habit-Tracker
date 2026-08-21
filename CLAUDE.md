@@ -318,6 +318,29 @@ back to the source rather than trusting the first report's line numbers.
   zero actual privacy impact since rename already leaks existence via 404.
   Cosmetic, not security.
 
+## Apple fluid-interfaces pass (2026-08-21)
+
+Audited motion/interaction against Apple's *Designing Fluid Interfaces* (WWDC
+2018) principles. Two real, correctly-scoped gaps found and fixed; everything
+else (tracking on large vs. small text, translucent nav, spatial consistency
+on the overview↔detail transition) already matched the guidance.
+
+- **Reduced motion was entirely unhandled.** Fixed globally in one line:
+  `App.tsx` wraps the router in `<MotionConfig reducedMotion="user">`, which
+  makes every `motion` component in the app respect OS
+  `prefers-reduced-motion` automatically (disables transform animation,
+  keeps opacity — a cross-fade instead of a slide, matching the HIG). The
+  two autoplaying `<video>` hero/feature backgrounds aren't Motion
+  components so `MotionConfig` doesn't reach them — those use
+  `useReducedMotion()` directly in `Landing.tsx` to drop `autoPlay`/`loop`
+  and show a static first frame instead, since a full-viewport looping
+  video is exactly what reduced-motion guidance calls out to avoid.
+- **No press feedback on the core loop's buttons.** The habit check-off
+  toggles (list + detail), heatmap cells, add-habit submit, and
+  delete/confirm/cancel controls only had `:hover`, nothing on press.
+  Converted these to `motion.button` with `whileTap={{ scale: ... }}` so
+  tapping reads as instant and physical, not just clickable.
+
 ## Known gaps / next steps
 
 - No CSV export, no reminders, no password reset flow

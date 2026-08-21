@@ -1,3 +1,5 @@
+import { motion } from "motion/react";
+
 const parseDate = (dStr: string) => {
   const [y, m, d] = dStr.split('-');
   return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
@@ -90,11 +92,12 @@ export default function Heatmap({ days, today, createdOn, onToggleDay }: Heatmap
 
           if (clickable) {
             return (
-              <button
+              <motion.button
                 key={isoDate}
                 type="button"
                 title={formatLabel(isoDate)}
                 onClick={() => onToggleDay!(isoDate)}
+                whileTap={{ scale: 0.8 }}
                 className={`${sharedClass} cursor-pointer focus-visible:outline focus-visible:outline-1 focus-visible:outline-primary`}
               />
             );

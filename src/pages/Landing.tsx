@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useInView, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ArrowRight, ArrowUp, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePageMeta } from "../hooks/usePageMeta";
@@ -97,12 +97,15 @@ function BackToTop() {
 
 // ---- SECTION 1: HERO ----
 function HeroSection() {
+  // A full-viewport autoplaying video is exactly what prefers-reduced-motion
+  // asks apps to avoid -- show the first frame as a still instead of looping it.
+  const reduceMotion = useReducedMotion();
   return (
     <section id="top" className="h-dvh w-full p-4 md:p-6 relative">
       <div className="relative w-full h-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-black">
         <video
-          autoPlay
-          loop
+          autoPlay={!reduceMotion}
+          loop={!reduceMotion}
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
@@ -214,6 +217,7 @@ function AnimatedLetter({ char, progress, range }: any) {
 
 // ---- SECTION 3: FEATURES ----
 function FeaturesSection() {
+  const reduceMotion = useReducedMotion();
   return (
     <section id="features" className="w-full min-h-dvh bg-black relative py-24 px-4 md:px-6 overflow-hidden">
       <div className="absolute inset-0 bg-noise opacity-[0.15] pointer-events-none mix-blend-overlay" />
@@ -234,8 +238,8 @@ function FeaturesSection() {
           <FeatureCard index={0}>
             <div className="relative w-full h-full min-h-[300px] lg:h-[480px] rounded-2xl md:rounded-3xl overflow-hidden bg-[#212121]">
               <video
-                autoPlay
-                loop
+                autoPlay={!reduceMotion}
+                loop={!reduceMotion}
                 muted
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover"

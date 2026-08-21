@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, MotionConfig } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
@@ -103,14 +103,21 @@ export default function App() {
 
   return (
     <Router>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary focus:text-black focus:px-4 focus:py-2 focus:rounded-full focus:font-medium"
-      >
-        Skip to content
-      </a>
-      <AnimatedRoutes isAuthenticated={isAuthenticated} user={user} refreshAuth={refreshAuth} />
-      <Analytics />
+      {/* reducedMotion="user" makes every motion component in the app respect
+          the OS prefers-reduced-motion setting automatically: transform-based
+          animation (x/y/scale) is disabled, opacity animation is kept -- the
+          cross-fade-not-slide behavior Apple's HIG asks for, with no changes
+          needed at each individual motion.div. */}
+      <MotionConfig reducedMotion="user">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary focus:text-black focus:px-4 focus:py-2 focus:rounded-full focus:font-medium"
+        >
+          Skip to content
+        </a>
+        <AnimatedRoutes isAuthenticated={isAuthenticated} user={user} refreshAuth={refreshAuth} />
+        <Analytics />
+      </MotionConfig>
     </Router>
   );
 }
