@@ -28,6 +28,24 @@ constant is ever read for anything else.
 - **Live**: https://habit-tracker-six-kappa-49.vercel.app
 - **Repo**: https://github.com/Oxyrine/Personal-Habit-Tracker (branch `main`, auto-deploys via GitHub → Vercel)
 
+## Agent skills
+
+### Issue tracker
+
+Local markdown under `.scratch/<feature-slug>/`, not GitHub Issues despite the GitHub
+remote — this is a solo project. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`,
+`ready-for-human`, `wontfix`), unchanged. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root (neither exists yet —
+created lazily by `/domain-modeling` when terms/decisions actually get resolved). See
+`docs/agents/domain.md`.
+
 ## Architecture (major change, 2026-08-10/11)
 
 The app was originally server-rendered Flask/Jinja, then had a separate unwired
