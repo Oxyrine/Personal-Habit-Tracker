@@ -36,6 +36,7 @@ interface Habit {
   freezes: number;
   total: number;
   days: string[];
+  rest_days: string[];
 }
 
 const parseISO = (iso: string) => {
@@ -502,6 +503,7 @@ export default function Dashboard({ user }: { user: AuthUser | null }) {
                   <h3 className="text-lg font-medium mb-6 text-[#E1E0CC]">Activity Heatmap</h3>
                   <Heatmap
                     days={selectedHabit.days}
+                    restDays={selectedHabit.rest_days}
                     today={today}
                     createdOn={selectedHabit.created_on}
                     onToggleDay={(iso) => handleToggle(selectedHabit.id, iso)}

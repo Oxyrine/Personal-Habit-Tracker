@@ -17,9 +17,9 @@ _Avoid_: Entry, check-in
 
 **Rest Day**:
 A streak-continuation allowance, earned automatically — one is banked for every 7
-consecutive days actually completed within the current streak. It's spent silently:
-the next missed day is covered without any notification of which day it covered or
-that a Rest Day was used at all.
+consecutive days actually completed within the current streak, and spent
+automatically on the next missed day with no manual control. Usage is visible after
+the fact: a covered day renders distinctly on the habit detail heatmap.
 _Avoid_: Freeze, streak freeze
 
 **Current Streak**:

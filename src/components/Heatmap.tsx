@@ -17,12 +17,13 @@ const formatLabel = (iso: string) =>
 
 interface HeatmapProps {
   days: string[];
+  restDays: string[];
   today: string;
   createdOn: string;
   onToggleDay?: (iso: string) => void;
 }
 
-export default function Heatmap({ days, today, createdOn, onToggleDay }: HeatmapProps) {
+export default function Heatmap({ days, restDays, today, createdOn, onToggleDay }: HeatmapProps) {
   if (!today) return null;
 
   const endDate = parseDate(today);
@@ -43,6 +44,7 @@ export default function Heatmap({ days, today, createdOn, onToggleDay }: Heatmap
 
   const cells: (Date | null)[] = [...padStart, ...dateArray];
   const completedSet = new Set(days);
+  const restDaySet = new Set(restDays);
 
   const weeks: (Date | null)[][] = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
@@ -79,6 +81,7 @@ export default function Heatmap({ days, today, createdOn, onToggleDay }: Heatmap
           }
           const isoDate = toISO(d);
           const isDone = completedSet.has(isoDate);
+          const isRestDay = restDaySet.has(isoDate);
           const beforeCreation = d < createdDate;
           const clickable = !beforeCreation && !!onToggleDay;
 
@@ -86,16 +89,19 @@ export default function Heatmap({ days, today, createdOn, onToggleDay }: Heatmap
             ? 'bg-white/[0.03]'
             : isDone
               ? 'bg-primary'
-              : 'bg-white/5 hover:bg-white/10';
+              : isRestDay
+                ? 'bg-primary/30 hover:bg-primary/40'
+                : 'bg-white/5 hover:bg-white/10';
 
           const sharedClass = `w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] rounded-[2px] transition-colors duration-300 ${colorClass}`;
+          const label = isRestDay ? `${formatLabel(isoDate)} — Rest Day used` : formatLabel(isoDate);
 
           if (clickable) {
             return (
               <motion.button
                 key={isoDate}
                 type="button"
-                title={formatLabel(isoDate)}
+                title={label}
                 onClick={() => onToggleDay!(isoDate)}
                 whileTap={{ scale: 0.8 }}
                 className={`${sharedClass} cursor-pointer focus-visible:outline focus-visible:outline-1 focus-visible:outline-primary`}
@@ -105,7 +111,7 @@ export default function Heatmap({ days, today, createdOn, onToggleDay }: Heatmap
           return (
             <div
               key={isoDate}
-              title={beforeCreation ? undefined : formatLabel(isoDate)}
+              title={beforeCreation ? undefined : label}
               className={sharedClass}
             />
           );
@@ -118,6 +124,9 @@ export default function Heatmap({ days, today, createdOn, onToggleDay }: Heatmap
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-[10px] h-[10px] rounded-[2px] bg-white/5 inline-block" /> Missed
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-[10px] h-[10px] rounded-[2px] bg-primary/30 inline-block" /> Rest Day used
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-[10px] h-[10px] rounded-[2px] bg-primary inline-block" /> Done

@@ -85,13 +85,14 @@ with app.app_context():
 def compute_streaks(days, created_on, today):
     days = {d for d in days if d >= created_on}
     if not days:
-        return 0, 0, 0
-        
+        return 0, 0, 0, set()
+
     longest = 0
     current = 0
     freezes = 0
     actual_done_in_current_streak = 0
-    
+    rest_days_used = set()
+
     cursor = created_on
     while cursor <= today:
         if cursor in days:
@@ -107,13 +108,14 @@ def compute_streaks(days, created_on, today):
                 freezes -= 1
                 current += 1
                 longest = max(longest, current)
+                rest_days_used.add(cursor)
             else:
                 current = 0
                 actual_done_in_current_streak = 0
                 freezes = 0
         cursor += timedelta(days=1)
-        
-    return current, longest, freezes
+
+    return current, longest, freezes, rest_days_used
 
 def current_user():
     return db.session.get(User, session["user_id"])
@@ -209,7 +211,7 @@ def get_habits():
     rows = []
     for h in habits:
         days = {log.day for log in h.logs}
-        current, longest, freezes = compute_streaks(days, h.created_on, today)
+        current, longest, freezes, rest_days_used = compute_streaks(days, h.created_on, today)
         rows.append(
             {
                 "id": h.id,
@@ -221,6 +223,7 @@ def get_habits():
                 "freezes": freezes,
                 "total": sum(1 for d in days if d >= h.created_on),
                 "days": sorted(d.isoformat() for d in days if d >= start),
+                "rest_days": sorted(d.isoformat() for d in rest_days_used if d >= start),
             }
         )
     return jsonify({"habits": rows, "today": today.isoformat()})
@@ -285,7 +288,7 @@ def toggle():
     db.session.commit()
 
     days = {l.day for l in habit.logs}
-    current, longest, freezes = compute_streaks(days, habit.created_on, today)
+    current, longest, freezes, _ = compute_streaks(days, habit.created_on, today)
     return jsonify(
         habit_id=habit.id,
         day=day.isoformat(),
